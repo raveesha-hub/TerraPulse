@@ -1,0 +1,1991 @@
+Index · HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weatherly — Smart Weather Monitoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070b13;
+    --sidebar:#080c15;
+    --card:#0e1526;
+    --card-2:#0b1220;
+    --edge: rgba(255,255,255,0.07);
+    --text:#eef3fb;
+    --muted:#7c8aa3;
+    --cyan:#3fd0f0;
+    --blue:#4aa8ff;
+    --purple:#9b7bff;
+    --green:#3fe6a8;
+    --amber:#f2b544;
+    --red:#ff5c6c;
+  }
+  html[data-theme="light"]{
+    --bg:#eef2f8;
+    --sidebar:#ffffff;
+    --card:#ffffff;
+    --card-2:#f4f7fb;
+    --edge: rgba(15,23,42,0.08);
+    --text:#101828;
+    --muted:#66738c;
+  }
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;}
+ 
+  .shell{display:flex;min-height:100vh;}
+ 
+  /* ================= SIDEBAR ================= */
+  .sidebar{
+    width:264px;flex:0 0 264px;background:var(--sidebar);
+    border-right:1px solid var(--edge);
+    display:flex;flex-direction:column;
+    padding:22px 18px 18px;position:sticky;top:0;height:100vh;overflow-y:auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:0 6px 22px;}
+  .brand-icon{font-size:26px;line-height:1;}
+  .brand-name{font-family:'Poppins',sans-serif;font-weight:700;font-size:18px;letter-spacing:.01em;}
+  .brand-sub{color:var(--muted);font-size:10.5px;font-weight:500;margin-top:1px;}
+ 
+  .nav{display:flex;flex-direction:column;gap:3px;margin-bottom:18px;}
+  .nav-item{
+    display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;
+    font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .nav-item .ic{width:17px;text-align:center;font-size:14.5px;}
+  .nav-item:hover{background:rgba(255,255,255,0.04);color:var(--text);}
+  html[data-theme="light"] .nav-item:hover{background:rgba(15,23,42,0.05);}
+  .nav-item.active{
+    background:linear-gradient(135deg, rgba(63,208,240,0.22), rgba(74,168,255,0.10));
+    color:#eaf8ff;box-shadow:inset 0 0 0 1px rgba(63,208,240,0.25);
+  }
+  html[data-theme="light"] .nav-item.active{color:#0b5d78;}
+ 
+  .device-card{
+    margin-top:auto;background:var(--card);border:1px solid var(--edge);border-radius:14px;
+    padding:14px 14px 12px;font-size:12px;
+  }
+  .ds-head{display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:12.5px;margin-bottom:10px;}
+  .ds-online{display:flex;align-items:center;gap:5px;color:var(--green);font-size:11px;font-weight:700;}
+  .ds-online .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:blip 1.6s infinite;}
+  .ds-online.demo{color:var(--amber);}
+  .ds-online.demo .dot{background:var(--amber);box-shadow:0 0 6px var(--amber);}
+  @keyframes blip{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .ds-node{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .ds-node .chip{width:30px;height:30px;border-radius:9px;background:rgba(74,168,255,0.12);display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .ds-node .name{font-weight:700;font-size:12.5px;}
+  .ds-node .model{color:var(--muted);font-size:10.5px;}
+  .ds-line{display:flex;align-items:center;justify-content:space-between;padding:5px 0;color:var(--muted);font-size:11.5px;border-top:1px solid var(--edge);}
+  .ds-line span:last-child{color:var(--text);font-weight:600;font-family:'JetBrains Mono',monospace;font-size:11px;}
+ 
+  .theme-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;}
+  .theme-row .ic{font-size:13px;color:var(--muted);}
+  .switch{width:46px;height:24px;border-radius:14px;background:linear-gradient(90deg,#2456d1,#3fa9f0);position:relative;cursor:pointer;flex:0 0 auto;}
+  .switch .knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .18s ease;box-shadow:0 2px 6px rgba(0,0,0,0.3);}
+  html[data-theme="light"] .switch .knob{left:24px;}
+  html[data-theme="light"] .switch{background:#dbe4f3;}
+ 
+  .sidebar-footer{text-align:center;color:var(--muted);font-size:10.5px;margin-top:16px;line-height:1.6;}
+ 
+  /* ================= MAIN ================= */
+  .main{flex:1;min-width:0;padding:22px 26px 30px;}
+ 
+  .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px;}
+  .topbar h1{font-family:'Poppins',sans-serif;font-size:22px;margin:0 0 4px;}
+  .topbar p{margin:0;color:var(--muted);font-size:13px;}
+  .topbar-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .systems-pill{
+    display:inline-flex;align-items:center;gap:7px;background:rgba(63,230,168,0.13);color:var(--green);
+    font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:20px;white-space:nowrap;
+    transition:background .2s ease, color .2s ease;
+  }
+  .systems-pill.warn{background:rgba(242,181,68,0.15);color:var(--amber);}
+  .systems-pill.alert{background:rgba(255,92,108,0.15);color:var(--red);}
+  .clock-block{text-align:right;}
+  .clock-block .time{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;}
+  .clock-block .date{color:var(--muted);font-size:11px;}
+  .refresh-btn{
+    width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--edge);
+    color:var(--text);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:transform .5s ease, border-color .2s ease;
+  }
+  .refresh-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+  .refresh-btn.spin{transform:rotate(360deg);}
+ 
+  /* ---- sensor cards ---- */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(165px, 1fr));gap:14px;margin-bottom:20px;
+  }
+  .card{
+    background:var(--card);border:1px solid var(--edge);border-radius:16px;
+    padding:16px 12px 15px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;
+    position:relative;transition:border-color .2s ease, transform .2s ease;
+  }
+  .card:hover{border-color:rgba(255,255,255,0.16);transform:translateY(-2px);}
+  .card-top{display:flex;align-items:center;justify-content:space-between;width:100%;}
+  .card-chip{
+    width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    font-size:15px;background:var(--chipbg);
+  }
+  .card-titles{flex:1;text-align:left;padding:0 8px;min-width:0;}
+  .card-title{font-family:'Poppins',sans-serif;font-weight:700;font-size:12.5px;line-height:1.25;}
+  .card-sub{color:var(--muted);font-size:10px;font-weight:600;}
+  .card-menu{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:2px 4px;}
+ 
+  .ring-wrap{position:relative;width:96px;height:96px;margin:4px 0 0;}
+  .ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg);}
+  .ring-track{fill:none;stroke:rgba(255,255,255,0.07);stroke-width:8;}
+  html[data-theme="light"] .ring-track{stroke:rgba(15,23,42,0.08);}
+  .ring-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1);}
+  .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring-center .val{font-family:'Poppins',sans-serif;font-weight:700;font-size:22px;line-height:1;}
+  .ring-center .unit{font-size:9px;color:var(--muted);letter-spacing:.05em;margin-top:3px;text-transform:uppercase;}
+ 
+  .status-pill{
+    font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:4px 12px;border-radius:20px;
+    background:rgba(63,230,168,0.14);color:var(--green);
+  }
+  .status-pill.warn{background:rgba(242,181,68,0.16);color:var(--amber);}
+  .status-pill.alert{background:rgba(255,92,108,0.16);color:var(--red);}
+  .status-pill.info{background:rgba(74,168,255,0.16);color:var(--blue);}
+  .range-label{color:var(--muted);font-size:10.5px;}
+ 
+  /* ---- mid grid: trends + summary ---- */
+  .mid-grid{display:grid;grid-template-columns:2.15fr 1fr;gap:16px;margin-bottom:16px;align-items:start;}
+  .panel{background:var(--card);border:1px solid var(--edge);border-radius:18px;padding:20px 22px;}
+  .panel-head{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+  .panel-title{font-family:'Poppins',sans-serif;font-weight:700;font-size:15.5px;}
+  .panel-title .sub{color:var(--muted);font-weight:500;font-size:12px;margin-left:4px;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--muted);font-weight:600;}
+  .legend-dot{width:7px;height:7px;border-radius:50%;}
+ 
+  .chart-wrap{position:relative;width:100%;height:220px;margin-top:6px;}
+  .chart-wrap svg{width:100%;height:100%;overflow:visible;}
+  .grid-line{stroke:var(--edge);stroke-width:1;}
+  .axis-label{font-size:9.5px;fill:var(--muted);font-family:'JetBrains Mono',monospace;}
+  .chart-line{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+  .chart-area{opacity:.12;}
+  .x-labels{display:flex;justify-content:space-between;margin-top:6px;color:var(--muted);font-size:10px;font-family:'JetBrains Mono',monospace;}
+ 
+  .avg-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--edge);}
+  .avg-item{display:flex;align-items:center;gap:9px;}
+  .avg-item .ic{font-size:17px;}
+  .avg-item .lbl{color:var(--muted);font-size:11px;}
+  .avg-item .num{font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;}
+  .avg-note{grid-column:1/-1;text-align:right;color:var(--muted);font-size:10px;margin-top:2px;}
+ 
+  .summary-banner{
+    display:flex;align-items:flex-start;gap:11px;background:rgba(63,230,168,0.10);border:1px solid rgba(63,230,168,0.22);
+    border-radius:13px;padding:13px 14px;margin-bottom:14px;transition:background .2s ease, border-color .2s ease;
+  }
+  .summary-banner.warn{background:rgba(242,181,68,0.10);border-color:rgba(242,181,68,0.25);}
+  .summary-banner.alert{background:rgba(255,92,108,0.10);border-color:rgba(255,92,108,0.25);}
+  .summary-banner .chk{width:26px;height:26px;border-radius:50%;background:var(--green);color:#04140d;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;}
+  .summary-banner.warn .chk{background:var(--amber);}
+  .summary-banner.alert .chk{background:var(--red);}
+  .summary-banner .t1{font-weight:700;font-size:13px;margin-bottom:2px;}
+  .summary-banner .t2{color:var(--muted);font-size:11.5px;line-height:1.4;}
+ 
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .tile{background:var(--card-2);border:1px solid var(--edge);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;}
+  .tile .chip{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto;}
+  .tile .lbl{color:var(--muted);font-size:10.5px;}
+  .tile .val{font-weight:700;font-size:13px;}
+ 
+  /* ---- bottom grid: alerts + health ---- */
+  .bottom-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;}
+  .view-all{background:none;border:none;color:var(--blue);font-weight:700;font-size:12px;cursor:pointer;}
+  .alert-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-top:1px solid var(--edge);cursor:pointer;}
+  .alert-row:first-of-type{border-top:none;}
+  .alert-ic{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex:0 0 auto;margin-top:1px;}
+  .alert-ic.ok{background:rgba(63,230,168,0.16);color:var(--green);}
+  .alert-ic.warn{background:rgba(242,181,68,0.18);color:var(--amber);}
+  .alert-time{color:var(--muted);font-size:10.5px;font-family:'JetBrains Mono',monospace;margin-bottom:2px;}
+  .alert-title{font-weight:700;font-size:13px;margin-bottom:1px;}
+  .alert-desc{color:var(--muted);font-size:11.5px;}
+  .alert-chev{margin-left:auto;color:var(--muted);font-size:15px;align-self:center;}
+ 
+  .health-sub{color:var(--muted);font-size:12px;margin:-6px 0 14px;}
+  .health-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;}
+  .health-item{display:flex;align-items:center;gap:10px;padding:8px 0;}
+  .health-item .chip{width:32px;height:32px;border-radius:9px;background:var(--card-2);display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto;}
+  .health-item .name{font-weight:700;font-size:12px;}
+  .health-item .role{color:var(--muted);font-size:10px;}
+  .health-item .right{margin-left:auto;text-align:right;}
+  .health-item .ok-lbl{color:var(--green);font-weight:700;font-size:10.5px;}
+  .bars{display:flex;align-items:flex-end;gap:2px;height:12px;margin-top:2px;justify-content:flex-end;}
+  .bars i{width:3px;border-radius:1px;background:var(--green);display:block;}
+  .bars i:nth-child(1){height:40%;} .bars i:nth-child(2){height:60%;} .bars i:nth-child(3){height:80%;} .bars i:nth-child(4){height:100%;}
+ 
+  .app-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:22px;color:var(--muted);font-size:11px;flex-wrap:wrap;}
+  .footer-mid{display:flex;align-items:center;gap:10px;flex:1;max-width:340px;}
+  .footer-mid .bar{flex:1;height:3px;border-radius:2px;background:var(--edge);position:relative;overflow:hidden;}
+  .footer-mid .bar .fill{position:absolute;left:0;top:0;bottom:0;width:38%;background:var(--cyan);border-radius:2px;}
+ 
+  /* ================= MODE SWITCH ================= */
+  .mode-switch{display:inline-flex;background:var(--card);border:1px solid var(--edge);border-radius:12px;padding:3px;gap:2px;}
+  .mode-btn{border:none;background:none;color:var(--muted);font-weight:700;font-size:12px;padding:8px 14px;border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s ease,color .15s ease;}
+  .mode-btn:hover{color:var(--text);}
+  .mode-btn.active.normal{background:rgba(63,230,168,0.16);color:var(--green);}
+  .mode-btn.active.demo{background:rgba(242,181,68,0.18);color:var(--amber);}
+ 
+  /* ================= SKY BANNER ================= */
+  .sky-banner{
+    display:flex;align-items:center;gap:20px;flex-wrap:wrap;border-radius:18px;padding:18px 24px;margin-bottom:20px;
+    border:1px solid var(--edge);transition:background .4s ease,border-color .4s ease;
+  }
+  .sky-banner.day{background:linear-gradient(120deg, rgba(242,181,68,0.22), rgba(74,168,255,0.14));border-color:rgba(242,181,68,0.30);}
+  .sky-banner.overcast{background:linear-gradient(120deg, rgba(124,138,163,0.28), rgba(74,168,255,0.12));border-color:rgba(124,138,163,0.38);}
+  .sky-banner.night{background:linear-gradient(120deg, rgba(70,56,160,0.45), rgba(18,30,72,0.55));border-color:rgba(155,123,255,0.32);}
+  .sky-icon{font-size:52px;line-height:1;min-width:64px;text-align:center;}
+  .sky-main{flex:1;min-width:200px;}
+  .sky-label{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:3px;}
+  .sky-title{font-family:'Poppins',sans-serif;font-weight:700;font-size:24px;line-height:1.15;}
+  .sky-desc{color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.45;}
+  .sky-stats{display:flex;gap:22px;flex-wrap:wrap;}
+  .sky-stat{display:flex;flex-direction:column;gap:2px;}
+  .sky-stat .lbl{color:var(--muted);font-size:10.5px;font-weight:600;}
+  .sky-stat .v{font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;}
+ 
+  /* ================= DEMO PANEL ================= */
+  .demo-panel{margin-bottom:20px;border-color:rgba(242,181,68,0.35);}
+  .preset-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+  .chip-btn{background:var(--card-2);border:1px solid var(--edge);color:var(--text);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:border-color .15s ease,background .15s ease;}
+  .chip-btn:hover{border-color:var(--cyan);}
+  .chip-btn.active{background:rgba(63,208,240,0.16);border-color:var(--cyan);color:var(--cyan);}
+  .slider-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px 24px;}
+  .sl-top{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:6px;}
+  .sl-top .v{font-family:'JetBrains Mono',monospace;color:var(--cyan);}
+  .sl input[type=range]{width:100%;accent-color:var(--cyan);cursor:pointer;}
+  .ldr-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid var(--edge);font-size:12px;font-weight:600;}
+  .ldr-row .hint{color:var(--muted);font-weight:500;font-size:11px;}
+  .auto-sim{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;}
+  .auto-sim input{accent-color:var(--amber);cursor:pointer;}
+ 
+  /* ================= EXTRA VIEWS (Map / Settings / Device) ================= */
+  .view-head{margin-bottom:16px;}
+  .view-head h2{font-family:'Poppins',sans-serif;font-size:18px;margin:0 0 3px;}
+  .view-head p{margin:0;color:var(--muted);font-size:12.5px;}
+ 
+  .map-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:start;}
+  .map-frame{width:100%;height:480px;border:1px solid var(--edge);border-radius:14px;background:var(--card-2);display:block;}
+  .kv{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--edge);font-size:12.5px;}
+  .kv:first-of-type{border-top:none;}
+  .kv .k{color:var(--muted);}
+  .kv .v{font-weight:700;text-align:right;word-break:break-word;}
+  .kv .v.mono{font-family:'JetBrains Mono',monospace;font-size:12px;}
+  .btn{background:var(--card-2);border:1px solid var(--edge);color:var(--text);border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;transition:border-color .15s ease;display:inline-flex;align-items:center;gap:6px;}
+  .btn:hover{border-color:var(--cyan);color:var(--cyan);}
+  .btn.primary{background:linear-gradient(135deg, rgba(63,208,240,0.28), rgba(74,168,255,0.18));border-color:rgba(63,208,240,0.45);color:var(--cyan);}
+  .btn.danger:hover{border-color:var(--red);color:var(--red);}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+  .map-msg{color:var(--muted);font-size:11.5px;margin-top:10px;min-height:16px;}
+ 
+
+  /* ---- map click readings + prediction ---- */
+  .map-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px;}
+  .map-tools input[type=date], .map-tools select{background:var(--card-2);border:1px solid var(--edge);color:var(--text);border-radius:10px;padding:8px 10px;font:600 12.5px 'Inter',sans-serif;color-scheme:dark;}
+  html[data-theme="light"] .map-tools input[type=date]{color-scheme:light;}
+  .map-tools .lbl{color:var(--muted);font-size:12px;font-weight:600;}
+  .map-tools .sep{flex:1;}
+  .map-hint{color:var(--muted);font-size:11.5px;margin:-4px 0 14px;}
+  .pred-banner{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;background:var(--card-2);border:1px solid var(--edge);border-left:4px solid var(--rc,#3fe6a8);font-size:12.5px;margin-bottom:14px;}
+  .pred-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+  .risk-card{background:var(--card-2);border:1px solid var(--edge);border-radius:14px;padding:14px;border-top:3px solid var(--rc,#3fe6a8);}
+  .risk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:700;font-size:13px;}
+  .risk-pill{font-size:10.5px;font-weight:800;letter-spacing:.06em;padding:3px 9px;border-radius:20px;background:var(--rc);color:#06101c;}
+  .risk-bar{height:6px;border-radius:4px;background:var(--edge);margin:10px 0;overflow:hidden;}
+  .risk-bar i{display:block;height:100%;background:var(--rc);border-radius:4px;transition:width .3s ease;}
+  .risk-msg{font-size:12px;color:var(--muted);line-height:1.5;}
+  .outlook{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;font-size:10.5px;align-items:center;color:var(--muted);}
+  .outlook span.o{padding:2px 8px;border-radius:12px;border:1px solid var(--rc);color:var(--rc);font-weight:800;}
+  .hist-wrap{margin-top:16px;}
+  .hist{display:flex;gap:8px;align-items:flex-end;height:190px;margin-top:8px;}
+  .hist .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;font-size:10.5px;color:var(--muted);}
+  .hist .bar{width:100%;max-width:46px;border-radius:6px 6px 0 0;background:#4aa8ff;min-height:2px;}
+  .hist .bar.heavy{background:#ff5c6c;}
+  .hist .col.fc .bar{background:transparent;border:1.5px dashed #4aa8ff;border-bottom:none;}
+  .hist .col.fc .bar.heavy{border-color:#ff5c6c;}
+  .hist .col.today{color:var(--text);font-weight:700;}
+  .hist-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:10px;}
+  .hist-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;}
+  .leaflet-container{font-family:'Inter',sans-serif;}
+  .settings-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:16px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px;}
+  .field .help{color:var(--muted);font-size:11px;margin-top:5px;line-height:1.4;}
+  .field input[type=text],.field input[type=number],.field select{
+    width:100%;background:var(--card-2);border:1px solid var(--edge);color:var(--text);border-radius:10px;
+    padding:10px 12px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s ease;
+  }
+  .field input:focus,.field select:focus{border-color:var(--cyan);}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .toast{position:fixed;right:22px;bottom:22px;background:var(--card);border:1px solid var(--green);color:var(--green);
+    padding:11px 16px;border-radius:12px;font-weight:700;font-size:12.5px;opacity:0;transform:translateY(8px);pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;z-index:50;}
+  .toast.show{opacity:1;transform:translateY(0);}
+ 
+  .sensor-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .sensor-table th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;padding:8px 8px;border-bottom:1px solid var(--edge);}
+  .sensor-table td{padding:10px 8px;border-bottom:1px solid var(--edge);}
+  .sensor-table tr:last-child td{border-bottom:none;}
+  .tag-ok{color:var(--green);font-weight:700;}
+  .raw-box{background:var(--card-2);border:1px solid var(--edge);border-radius:12px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);max-height:300px;overflow:auto;white-space:pre-wrap;margin:0;}
+  .dev-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:16px;align-items:start;margin-bottom:16px;}
+  .table-scroll{overflow-x:auto;}
+ 
+  @media (max-width: 1300px){
+    .mid-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width: 960px){
+    .shell{flex-direction:column;}
+    .sidebar{position:relative;width:100%;flex:0 0 auto;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;}
+    .sidebar .nav{flex-direction:row;flex-wrap:wrap;margin-bottom:0;}
+    .device-card{display:none;}
+    .theme-row{margin:0 0 0 auto;}
+    .sidebar-footer{display:none;}
+    .bottom-grid{grid-template-columns:1fr;}
+    .map-grid,.dev-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width: 700px){
+    .avg-row{grid-template-columns:1fr 1fr;}
+    .tiles{grid-template-columns:1fr;}
+    .field-row{grid-template-columns:1fr;}
+    .map-frame{height:340px;}
+  }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+</head>
+<body>
+<div class="shell">
+ 
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-icon">⛅</span>
+      <div>
+        <div class="brand-name">Weatherly</div>
+        <div class="brand-sub">Smart Weather Monitoring</div>
+      </div>
+    </div>
+ 
+    <nav class="nav" id="sideNav">
+      <a class="nav-item active" data-view="dashboard" data-target="topAnchor"><span class="ic">⌂</span> Dashboard</a>
+      <a class="nav-item" data-view="dashboard" data-target="cardsGrid"><span class="ic">📈</span> Live Readings</a>
+      <a class="nav-item" data-view="dashboard" data-target="trendsPanel"><span class="ic">🕘</span> History</a>
+      <a class="nav-item" data-view="dashboard" data-target="alertsPanel"><span class="ic">🔔</span> Alerts</a>
+      <a class="nav-item" data-view="map"><span class="ic">🗺</span> Map View</a>
+      <a class="nav-item" data-view="map" data-target="predPanel"><span class="ic">🔮</span> Prediction</a>
+      <a class="nav-item" data-view="settings"><span class="ic">⚙</span> Settings</a>
+      <a class="nav-item" data-view="device"><span class="ic">ⓘ</span> Device Info</a>
+    </nav>
+ 
+    <div class="device-card" id="deviceCard">
+      <div class="ds-head">Device Status <span class="ds-online demo" id="connBadge"><span class="dot"></span>Demo Mode</span></div>
+      <div class="ds-node">
+        <span class="chip">📡</span>
+        <div><div class="name">ESP32 Node</div><div class="model">ESP32-WROOM</div></div>
+      </div>
+      <div class="ds-line"><span>Uptime</span><span id="uptimeVal">00:00:00</span></div>
+      <div class="ds-line"><span>Last Update</span><span id="lastUpdateVal">--:--:--</span></div>
+      <div class="ds-line"><span>WiFi Signal</span><span id="wifiVal">-62 dBm</span></div>
+      <div class="ds-line"><span>Water Distance</span><span id="waterDistVal">-- cm</span></div>
+      <div style="margin-top:8px;color:var(--muted);font-size:10px;line-height:1.5;" id="deviceNote">Showing simulated demo data — no ESP32 board connected.</div>
+    </div>
+ 
+    <div class="theme-row">
+      <span class="ic">☀</span>
+      <div class="switch" id="themeSwitch"><div class="knob"></div></div>
+      <span class="ic">🌙</span>
+    </div>
+    <div class="sidebar-footer">© 2026 Weatherly<br>All rights reserved.</div>
+  </aside>
+ 
+  <main class="main">
+    <div id="topAnchor"></div>
+    <header class="topbar">
+      <div>
+        <h1>Welcome back!</h1>
+        <p id="welcomeSub">Here's what's happening with your environment.</p>
+      </div>
+      <div class="topbar-right">
+        <div class="mode-switch" id="modeSwitch">
+          <button class="mode-btn normal" data-mode="normal" title="Show live data from the ESP32">📡 Normal</button>
+          <button class="mode-btn demo" data-mode="demo" title="Set the values yourself">🎛 Demo</button>
+        </div>
+        <span class="systems-pill" id="systemsPill">✓ All Systems Normal</span>
+        <div class="clock-block">
+          <div class="time mono" id="clockTime">--:--:-- --</div>
+          <div class="date" id="clockDate">-- --, ----</div>
+        </div>
+        <button class="refresh-btn" id="refreshBtn" title="Refresh readings">⟳</button>
+      </div>
+    </header>
+ 
+    <!-- ====================== VIEW: DASHBOARD ====================== -->
+    <div id="view-dashboard">
+ 
+    <section class="sky-banner day" id="skyBanner">
+      <div class="sky-icon" id="skyIcon">☀️</div>
+      <div class="sky-main">
+        <div class="sky-label" id="skyPeriod">Daytime</div>
+        <div class="sky-title" id="skyTitle">Sunny Day</div>
+        <div class="sky-desc" id="skyDesc">--</div>
+      </div>
+      <div class="sky-stats">
+        <div class="sky-stat"><span class="lbl">Cloud Cover (est.)</span><span class="v" id="skyCloud">--%</span></div>
+        <div class="sky-stat"><span class="lbl">Wind Speed</span><span class="v" id="skyWind">-- RPM</span></div>
+        <div class="sky-stat"><span class="lbl">Light (LDR)</span><span class="v" id="skyLdr">--</span></div>
+      </div>
+    </section>
+ 
+    <section class="panel demo-panel" id="demoPanel" hidden>
+      <div class="panel-head">
+        <div class="panel-title">🎛 Demo Controls <span class="sub">(change any value — the whole dashboard updates)</span></div>
+        <label class="auto-sim"><input type="checkbox" id="autoSim"> Auto-simulate</label>
+      </div>
+      <div class="preset-row" id="presetRow">
+        <button class="chip-btn" data-preset="sunnyDay">☀️ Sunny Day</button>
+        <button class="chip-btn" data-preset="cloudyDay">☁️ Cloudy Day</button>
+        <button class="chip-btn" data-preset="clearNight">🌙 Clear Night</button>
+        <button class="chip-btn" data-preset="cloudyNight">☁️ Cloudy Night</button>
+        <button class="chip-btn" data-preset="rainyNight">🌧️ Rainy Night</button>
+        <button class="chip-btn" data-preset="storm">⛈️ Storm</button>
+      </div>
+      <div class="slider-grid" id="sliderGrid"></div>
+      <div class="ldr-row">
+        <span>💡 Time of day</span>
+        <button class="chip-btn" id="ldrDay">☀️ Day</button>
+        <button class="chip-btn" id="ldrNight">🌙 Night</button>
+        <span class="hint">LDR goes LOW (night light ON) at night, and also in the daytime when the sky is cloudy or raining.</span>
+      </div>
+    </section>
+ 
+    <section class="cards-grid" id="cardsGrid">
+ 
+      <div class="card" style="--chipbg:rgba(255,92,108,0.14);">
+        <div class="card-top">
+          <span class="card-chip">🌡️</span>
+          <div class="card-titles"><div class="card-title">Temperature</div><div class="card-sub">BMP180</div></div>
+          <button class="card-menu">⋯</button>
+        </div>
+        <div class="ring-wrap"><svg viewBox="0 0 100 100">
+          <circle class="ring-track" cx="50" cy="50" r="42"></circle>
+          <circle class="ring-fill" id="ringTemp" cx="50" cy="50" r="42" stroke="#3fd0f0"></circle>
+        </svg><div class="ring-center"><span class="val" id="valTemp" style="color:#3fd0f0;">27.8</span><span class="unit">°C</span></div></div>
+        <span class="status-pill" id="statusTemp">NORMAL</span>
+        <div class="range-label">Range: 18°C - 35°C</div>
+      </div>
+ 
+      <div class="card" style="--chipbg:rgba(74,168,255,0.14);">
+        <div class="card-top">
+          <span class="card-chip">💧</span>
+          <div class="card-titles"><div class="card-title">Humidity</div><div class="card-sub">DHT22</div></div>
+          <button class="card-menu">⋯</button>
+        </div>
+        <div class="ring-wrap"><svg viewBox="0 0 100 100">
+          <circle class="ring-track" cx="50" cy="50" r="42"></circle>
+          <circle class="ring-fill" id="ringHumid" cx="50" cy="50" r="42" stroke="#4aa8ff"></circle>
+        </svg><div class="ring-center"><span class="val" id="valHumid" style="color:#4aa8ff;">68</span><span class="unit">%</span></div></div>
+        <span class="status-pill" id="statusHumid">NORMAL</span>
+        <div class="range-label">Range: 30% - 90%</div>
+      </div>
+ 
+      <div class="card" style="--chipbg:rgba(155,123,255,0.16);">
+        <div class="card-top">
+          <span class="card-chip">🧭</span>
+          <div class="card-titles"><div class="card-title">Pressure</div><div class="card-sub">BMP180</div></div>
+          <button class="card-menu">⋯</button>
+        </div>
+        <div class="ring-wrap"><svg viewBox="0 0 100 100">
+          <circle class="ring-track" cx="50" cy="50" r="42"></circle>
+          <circle class="ring-fill" id="ringPressure" cx="50" cy="50" r="42" stroke="#9b7bff"></circle>
+        </svg><div class="ring-center"><span class="val" id="valPressure" style="color:#9b7bff;font-size:19px;">1015</span><span class="unit">hPa</span></div></div>
+        <span class="status-pill info" id="statusPressure">STABLE</span>
+        <div class="range-label">Range: 980 - 1050 hPa</div>
+      </div>
+ 
+      <div class="card" style="--chipbg:rgba(124,138,163,0.16);">
+        <div class="card-top">
+          <span class="card-chip">☔</span>
+          <div class="card-titles"><div class="card-title">Rain Sensor</div><div class="card-sub">Analog</div></div>
+          <button class="card-menu">⋯</button>
+        </div>
+        <div class="ring-wrap"><svg viewBox="0 0 100 100">
+          <circle class="ring-track" cx="50" cy="50" r="42"></circle>
+          <circle class="ring-fill" id="ringRain" cx="50" cy="50" r="42" stroke="#3fe6a8"></circle>
+        </svg><div class="ring-center"><span class="val" id="valRain" style="color:#3fe6a8;">21</span><span class="unit">%</span></div></div>
+        <span class="status-pill" id="statusRain">NONE</span>
+        <div class="range-label">Range: 0% - 100%</div>
+      </div>
+ 
+      <div class="card" style="--chipbg:rgba(74,168,255,0.14);">
+        <div class="card-top">
+          <span class="card-chip">🌊</span>
+          <div class="card-titles"><div class="card-title">Water Level</div><div class="card-sub">Ultrasonic</div></div>
+          <button class="card-menu">⋯</button>
+        </div>
+        <div class="ring-wrap"><svg viewBox="0 0 100 100">
+          <circle class="ring-track" cx="50" cy="50" r="42"></circle>
+          <circle class="ring-fill" id="ringWater" cx="50" cy="50" r="42" stroke="#3fe6a8"></circle>
+        </svg><div class="ring-center"><span class="val" id="valWater" style="color:#3fe6a8;">29</span><span class="unit">%</span></div></div>
+        <span class="status-pill" id="statusWater">LOW</span>
+        <div class="range-label">Range: 0% - 100%</div>
+      </div>
+ 
+      <div class="card" style="--chipbg:rgba(242,181,68,0.16);">
+        <div class="card-top">
+          <span class="card-chip">💭</span>
+          <div class="card-titles"><div class="card-title">Air Quality</div><div class="card-sub">MQ135</div></div>
+          <button class="card-menu">⋯</button>
+        </div>
+        <div class="ring-wrap"><svg viewBox="0 0 100 100">
+          <circle class="ring-track" cx="50" cy="50" r="42"></circle>
+          <circle class="ring-fill" id="ringAir" cx="50" cy="50" r="42" stroke="#f2b544"></circle>
+        </svg><div class="ring-center"><span class="val" id="valAir" style="color:#f2b544;">0</span><span class="unit">AQI</span></div></div>
+        <span class="status-pill" id="statusAir">GOOD</span>
+        <div class="range-label">Range: 0 - 500</div>
+      </div>
+ 
+      <div class="card" style="--chipbg:rgba(63,230,168,0.14);">
+        <div class="card-top">
+          <span class="card-chip">🌱</span>
+          <div class="card-titles"><div class="card-title">Soil Moisture</div><div class="card-sub">Capacitive</div></div>
+          <button class="card-menu">⋯</button>
+        </div>
+        <div class="ring-wrap"><svg viewBox="0 0 100 100">
+          <circle class="ring-track" cx="50" cy="50" r="42"></circle>
+          <circle class="ring-fill" id="ringSoil" cx="50" cy="50" r="42" stroke="#3fe6a8"></circle>
+        </svg><div class="ring-center"><span class="val" id="valSoil" style="color:#3fe6a8;">42</span><span class="unit">%</span></div></div>
+        <span class="status-pill warn" id="statusSoil">DRY</span>
+        <div class="range-label">Range: 0% - 100%</div>
+      </div>
+ 
+      <div class="card" style="--chipbg:rgba(94,224,208,0.16);">
+        <div class="card-top">
+          <span class="card-chip">🌬️</span>
+          <div class="card-titles"><div class="card-title">Wind Speed</div><div class="card-sub">Hall 3144E</div></div>
+          <button class="card-menu">⋯</button>
+        </div>
+        <div class="ring-wrap"><svg viewBox="0 0 100 100">
+          <circle class="ring-track" cx="50" cy="50" r="42"></circle>
+          <circle class="ring-fill" id="ringWind" cx="50" cy="50" r="42" stroke="#5ee0d0"></circle>
+        </svg><div class="ring-center"><span class="val" id="valWind" style="color:#5ee0d0;">0</span><span class="unit">RPM</span></div></div>
+        <span class="status-pill" id="statusWind">CALM</span>
+        <div class="range-label">Range: 0 - 600 RPM</div>
+      </div>
+ 
+      <div class="card" style="--chipbg:rgba(242,181,68,0.16);">
+        <div class="card-top">
+          <span class="card-chip">💡</span>
+          <div class="card-titles"><div class="card-title">Light</div><div class="card-sub">LDR Module</div></div>
+          <button class="card-menu">⋯</button>
+        </div>
+        <div class="ring-wrap"><svg viewBox="0 0 100 100">
+          <circle class="ring-track" cx="50" cy="50" r="42"></circle>
+          <circle class="ring-fill" id="ringLight" cx="50" cy="50" r="42" stroke="#f2b544"></circle>
+        </svg><div class="ring-center"><span class="val" id="valLight" style="font-size:32px;">☀️</span><span class="unit">LDR</span></div></div>
+        <span class="status-pill warn" id="statusLight">DAY</span>
+        <div class="range-label" id="rangeLight">Night light: OFF</div>
+      </div>
+ 
+    </section>
+ 
+    <section class="mid-grid">
+      <div class="panel" id="trendsPanel">
+        <div class="panel-head">
+          <div class="panel-title">Live Trends <span class="sub">(Last 30 Readings)</span></div>
+          <div class="legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#3fd0f0;"></span>Temp</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#4aa8ff;"></span>Humidity</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#9b7bff;"></span>Pressure</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#3fe6a8;"></span>Rain</span>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <svg id="trendChart" viewBox="0 0 900 190" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="gradTemp" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3fd0f0" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="#3fd0f0" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="gradHumid" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#4aa8ff" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#4aa8ff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <line class="grid-line" x1="0" y1="0" x2="900" y2="0"></line>
+            <line class="grid-line" x1="0" y1="47.5" x2="900" y2="47.5"></line>
+            <line class="grid-line" x1="0" y1="95" x2="900" y2="95"></line>
+            <line class="grid-line" x1="0" y1="142.5" x2="900" y2="142.5"></line>
+            <line class="grid-line" x1="0" y1="189.5" x2="900" y2="189.5"></line>
+            <text class="axis-label" x="2" y="10">40°C</text>
+            <text class="axis-label" x="2" y="57.5">30°C</text>
+            <text class="axis-label" x="2" y="105">20°C</text>
+            <text class="axis-label" x="2" y="152.5">10°C</text>
+            <text class="axis-label" x="2" y="187">0°C</text>
+            <text class="axis-label" x="865" y="10">1200hPa</text>
+            <text class="axis-label" x="875" y="57.5">900hPa</text>
+            <text class="axis-label" x="875" y="105">600hPa</text>
+            <text class="axis-label" x="875" y="152.5">300hPa</text>
+            <text class="axis-label" x="880" y="187">0hPa</text>
+ 
+            <path id="areaHumid" class="chart-area" fill="url(#gradHumid)"></path>
+            <path id="areaTemp" class="chart-area" fill="url(#gradTemp)"></path>
+            <polyline id="lineHumid" class="chart-line" stroke="#4aa8ff" points=""></polyline>
+            <polyline id="linePressure" class="chart-line" stroke="#9b7bff" points="" style="opacity:.85;"></polyline>
+            <polyline id="lineRain" class="chart-line" stroke="#3fe6a8" points="" style="opacity:.85;"></polyline>
+            <polyline id="lineTemp" class="chart-line" stroke="#3fd0f0" points=""></polyline>
+          </svg>
+        </div>
+        <div class="x-labels" id="xLabels"></div>
+ 
+        <div class="avg-row">
+          <div class="avg-item"><span class="ic">🌡️</span><div><div class="lbl">Average Temp</div><div class="num" id="avgTemp">--°C</div></div></div>
+          <div class="avg-item"><span class="ic">💧</span><div><div class="lbl">Average Humidity</div><div class="num" id="avgHumid">--%</div></div></div>
+          <div class="avg-item"><span class="ic">🧭</span><div><div class="lbl">Average Pressure</div><div class="num" id="avgPressure">-- hPa</div></div></div>
+          <div class="avg-item"><span class="ic">☔</span><div><div class="lbl">Total Rain</div><div class="num" id="avgRain">--%</div></div></div>
+          <div class="avg-note">(Last 30 Readings)</div>
+        </div>
+      </div>
+ 
+      <div class="panel">
+        <div class="panel-title" style="margin-bottom:14px;">Environmental Summary</div>
+        <div class="summary-banner" id="summaryBanner">
+          <span class="chk" id="summaryChk">✓</span>
+          <div>
+            <div class="t1" id="summaryTitle">All Systems Normal</div>
+            <div class="t2" id="summaryDesc">Everything is functioning within normal parameters.</div>
+          </div>
+        </div>
+        <div class="tiles">
+          <div class="tile"><span class="chip" style="background:rgba(74,168,255,0.14);" id="condIcon">⛅</span><div><div class="lbl">Weather Condition</div><div class="val" id="condVal">Partly Cloudy</div></div></div>
+          <div class="tile"><span class="chip" style="background:rgba(242,181,68,0.16);" id="comfortIcon">🙂</span><div><div class="lbl">Comfort Level</div><div class="val" id="comfortVal">Comfortable</div></div></div>
+          <div class="tile"><span class="chip" style="background:rgba(155,123,255,0.16);">📊</span><div><div class="lbl">Trend</div><div class="val" id="trendVal">Stable</div></div></div>
+          <div class="tile"><span class="chip" style="background:rgba(63,230,168,0.14);">🌱</span><div><div class="lbl">Air Quality</div><div class="val" id="aqVal">Good</div></div></div>
+          <div class="tile"><span class="chip" style="background:rgba(94,224,208,0.16);">🌬️</span><div><div class="lbl">Wind</div><div class="val" id="windTileVal">Calm</div></div></div>
+          <div class="tile"><span class="chip" style="background:rgba(155,123,255,0.16);" id="dnIcon">☀️</span><div><div class="lbl">Day / Night</div><div class="val" id="dnVal">Day</div></div></div>
+        </div>
+      </div>
+    </section>
+ 
+    <section class="bottom-grid">
+      <div class="panel" id="alertsPanel">
+        <div class="panel-head" style="margin-bottom:2px;">
+          <div class="panel-title">Recent Alerts</div>
+          <button class="view-all" id="viewAllBtn">View All</button>
+        </div>
+        <div id="alertsList"></div>
+      </div>
+ 
+      <div class="panel">
+        <div class="panel-title" style="margin-bottom:2px;">Sensor Health</div>
+        <div class="health-sub">All sensors are healthy and responding.</div>
+        <div class="health-grid">
+          <div class="health-item"><span class="chip">🌡️</span><div><div class="name">BMP180</div><div class="role">Temperature &amp; Pressure</div></div><div class="right"><div class="ok-lbl">Healthy</div><div class="bars"><i></i><i></i><i></i><i></i></div></div></div>
+          <div class="health-item"><span class="chip">🌊</span><div><div class="name">Water Level Sensor</div><div class="role">Water Level Monitoring</div></div><div class="right"><div class="ok-lbl">Healthy</div><div class="bars"><i></i><i></i><i></i><i></i></div></div></div>
+          <div class="health-item"><span class="chip">💧</span><div><div class="name">DHT22</div><div class="role">Humidity &amp; Temperature</div></div><div class="right"><div class="ok-lbl">Healthy</div><div class="bars"><i></i><i></i><i></i><i></i></div></div></div>
+          <div class="health-item"><span class="chip">💭</span><div><div class="name">MQ135</div><div class="role">Air Quality Monitoring</div></div><div class="right"><div class="ok-lbl">Healthy</div><div class="bars"><i></i><i></i><i></i><i></i></div></div></div>
+          <div class="health-item"><span class="chip">☔</span><div><div class="name">Rain Sensor</div><div class="role">Precipitation Detection</div></div><div class="right"><div class="ok-lbl">Healthy</div><div class="bars"><i></i><i></i><i></i><i></i></div></div></div>
+          <div class="health-item"><span class="chip">🌱</span><div><div class="name">Soil Moisture Sensor</div><div class="role">Soil Moisture Monitoring</div></div><div class="right"><div class="ok-lbl">Healthy</div><div class="bars"><i></i><i></i><i></i><i></i></div></div></div>
+          <div class="health-item"><span class="chip">🌬️</span><div><div class="name">Hall Sensor 3144E</div><div class="role">Wind Speed</div></div><div class="right"><div class="ok-lbl">Healthy</div><div class="bars"><i></i><i></i><i></i><i></i></div></div></div>
+          <div class="health-item"><span class="chip">💡</span><div><div class="name">LDR Module</div><div class="role">Day / Night Detection</div></div><div class="right"><div class="ok-lbl">Healthy</div><div class="bars"><i></i><i></i><i></i><i></i></div></div></div>
+        </div>
+      </div>
+    </section>
+ 
+    </div><!-- /view-dashboard -->
+ 
+    <!-- ====================== VIEW: MAP ====================== -->
+    <div id="view-map" hidden>
+      <div class="view-head">
+        <h2>🗺 Map View</h2>
+        <p>Click a place on the map to see its rain, wind speed and temperature for the chosen date. The prediction below uses the last few days of history.</p>
+      </div>
+      <div class="map-tools">
+        <span class="lbl">📅 Date</span>
+        <button class="btn" id="mapPrev" title="Previous day">◀</button>
+        <input type="date" id="mapDate">
+        <button class="btn" id="mapNext" title="Next day">▶</button>
+        <button class="btn" id="mapToday">Today</button>
+        <span class="lbl" style="margin-left:6px;">📍 Place</span>
+        <select id="mapPlaceSel"></select>
+        <span class="lbl" style="margin-left:6px;">📊 Data</span>
+        <select id="mapMode"><option value="real">Real (Open-Meteo)</option><option value="demo">Demo (simulated)</option></select>
+        <span class="sep"></span>
+        <button class="btn" id="mapFindRain">⛈ Next heavy-rain spell</button>
+        <button class="btn" id="mapFindWind">🌪 Next whirlwind day</button>
+      </div>
+      <div class="map-grid">
+        <div class="panel" style="padding:14px;">
+          <div id="leafletMap" class="map-frame"></div>
+          <div class="map-msg" id="mapMsg">Click anywhere on the map or on a coloured dot. Dot colour = highest risk for the chosen date (green low, amber watch, orange warning, red severe).</div>
+        </div>
+        <div style="display:grid;gap:16px;">
+          <div class="panel">
+            <div class="panel-title" style="margin-bottom:10px;">Selected place</div>
+            <div class="kv"><span class="k">Place</span><span class="v" id="spName">--</span></div>
+            <div class="kv"><span class="k">Coordinates</span><span class="v mono" id="spCoord">--</span></div>
+            <div class="kv"><span class="k">Date</span><span class="v" id="spDate">--</span></div>
+            <div class="kv"><span class="k">Terrain</span><span class="v" id="spTerrain">--</span></div>
+            <div class="kv"><span class="k">🌧 Rain</span><span class="v" id="spRain">--</span></div>
+            <div class="kv"><span class="k">💨 Wind speed</span><span class="v" id="spWind">--</span></div>
+            <div class="kv"><span class="k">🌡 Temperature</span><span class="v" id="spTemp">--</span></div>
+            <div class="map-msg" id="spNote"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title" style="margin-bottom:10px;">Station</div>
+            <div class="kv"><span class="k">Name</span><span class="v" id="mpName">--</span></div>
+            <div class="kv"><span class="k">Latitude</span><span class="v mono" id="mpLat">--</span></div>
+            <div class="kv"><span class="k">Longitude</span><span class="v mono" id="mpLng">--</span></div>
+            <div class="kv"><span class="k">Connection</span><span class="v" id="mpConn">--</span></div>
+            <div class="kv"><span class="k">Condition</span><span class="v" id="mpCond">--</span></div>
+            <div class="kv"><span class="k">Temperature</span><span class="v" id="mpTemp">--</span></div>
+            <div class="kv"><span class="k">Humidity</span><span class="v" id="mpHumid">--</span></div>
+            <div class="kv"><span class="k">Rain</span><span class="v" id="mpRain">--</span></div>
+            <div class="btn-row">
+              <button class="btn primary" id="mapLocate">📍 Use my location</button>
+              <a class="btn" id="mapGoogle" target="_blank" rel="noopener">Open in Google Maps</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="predPanel" style="margin-top:16px;">
+        <div class="panel-title" style="margin-bottom:4px;">🔮 Prediction</div>
+        <div class="map-msg" id="predSub" style="margin:0 0 14px;"></div>
+        <div class="pred-banner" id="predBanner"></div>
+        <div class="pred-grid" id="predCards"></div>
+        <div class="hist-wrap">
+          <div class="panel-title" style="font-size:12.5px;">Rain &amp; wind: last 5 days and next 2 days</div>
+          <div class="hist" id="predHist"></div>
+          <div class="hist-legend">
+            <span><i style="background:#4aa8ff"></i>Light rain (1–50%)</span>
+            <span><i style="background:#ff5c6c"></i>Heavy rain (above 50%)</span>
+            <span><i style="border:1.5px dashed #4aa8ff;background:transparent"></i>Next 2 days (forecast)</span>
+          </div>
+        </div>
+        <div class="map-msg" id="predNote" style="margin-top:14px;"></div>
+      </div>
+    </div>
+ 
+    <!-- ====================== VIEW: SETTINGS ====================== -->
+    <div id="view-settings" hidden>
+      <div class="view-head">
+        <h2>⚙ Settings</h2>
+        <p>These are saved in this browser only.</p>
+      </div>
+      <div class="settings-grid">
+        <div class="panel">
+          <div class="panel-title" style="margin-bottom:14px;">Station</div>
+          <div class="field">
+            <label for="setName">Station name</label>
+            <input type="text" id="setName" maxlength="40" placeholder="My Weather Station">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="setLat">Latitude</label>
+              <input type="number" id="setLat" step="0.0001" min="-90" max="90">
+            </div>
+            <div class="field">
+              <label for="setLng">Longitude</label>
+              <input type="number" id="setLng" step="0.0001" min="-180" max="180">
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0;"><div class="help">Used by the Map View. You can also press "Use my location" on the map page.</div></div>
+        </div>
+ 
+        <div class="panel">
+          <div class="panel-title" style="margin-bottom:14px;">Display &amp; connection</div>
+          <div class="field">
+            <label for="setTheme">Theme</label>
+            <select id="setTheme">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="setStale">Mark ESP32 offline after (seconds)</label>
+            <input type="number" id="setStale" min="5" max="600" step="1">
+            <div class="help">If no new reading arrives within this time, the badge changes from Live to Offline.</div>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label for="setMode">Start in mode</label>
+            <select id="setMode">
+              <option value="normal">Normal (live ESP32)</option>
+              <option value="demo">Demo (manual)</option>
+            </select>
+          </div>
+        </div>
+ 
+        <div class="panel">
+          <div class="panel-title" style="margin-bottom:6px;">Data</div>
+          <div class="help" style="color:var(--muted);font-size:12px;line-height:1.5;">Clear the alert history or put every setting back to its default value.</div>
+          <div class="btn-row">
+            <button class="btn primary" id="setSave">Save settings</button>
+            <button class="btn" id="setClearAlerts">Clear alerts</button>
+            <button class="btn danger" id="setReset">Reset to defaults</button>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- ====================== VIEW: DEVICE INFO ====================== -->
+    <div id="view-device" hidden>
+      <div class="view-head">
+        <h2>ⓘ Device Info</h2>
+        <p>Details about the ESP32 node and the sensors connected to it.</p>
+      </div>
+      <div class="dev-grid">
+        <div class="panel">
+          <div class="panel-title" style="margin-bottom:10px;">ESP32 Node</div>
+          <div class="kv"><span class="k">Board</span><span class="v">ESP32-WROOM</span></div>
+          <div class="kv"><span class="k">Status</span><span class="v" id="dvStatus">--</span></div>
+          <div class="kv"><span class="k">Mode</span><span class="v" id="dvMode">--</span></div>
+          <div class="kv"><span class="k">Dashboard uptime</span><span class="v mono" id="dvUptime">--</span></div>
+          <div class="kv"><span class="k">Last update</span><span class="v mono" id="dvLast">--</span></div>
+          <div class="kv"><span class="k">WiFi signal</span><span class="v mono" id="dvWifi">--</span></div>
+          <div class="kv"><span class="k">Water distance</span><span class="v mono" id="dvWater">--</span></div>
+          <div class="kv"><span class="k">Night light</span><span class="v" id="dvNight">--</span></div>
+          <div class="kv"><span class="k">Database path</span><span class="v mono">/sensors</span></div>
+          <div class="kv"><span class="k">Dashboard version</span><span class="v mono">v1.0.0</span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title" style="margin-bottom:10px;">Connected sensors</div>
+          <div class="table-scroll">
+          <table class="sensor-table">
+            <thead><tr><th>Sensor</th><th>Measures</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>BMP180</td><td>Temperature, pressure</td><td class="tag-ok">Healthy</td></tr>
+              <tr><td>DHT22</td><td>Humidity, temperature</td><td class="tag-ok">Healthy</td></tr>
+              <tr><td>Rain sensor (analog)</td><td>Precipitation</td><td class="tag-ok">Healthy</td></tr>
+              <tr><td>Ultrasonic</td><td>Water level</td><td class="tag-ok">Healthy</td></tr>
+              <tr><td>MQ135</td><td>Air quality</td><td class="tag-ok">Healthy</td></tr>
+              <tr><td>Soil moisture (capacitive)</td><td>Soil moisture</td><td class="tag-ok">Healthy</td></tr>
+              <tr><td>Hall 3144E</td><td>Wind speed (RPM)</td><td class="tag-ok">Healthy</td></tr>
+              <tr><td>LDR module</td><td>Day / night, night light</td><td class="tag-ok">Healthy</td></tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title" style="margin-bottom:10px;">Latest raw data from the ESP32</div>
+        <pre class="raw-box" id="dvRaw">No reading received yet.</pre>
+      </div>
+    </div>
+ 
+    <footer class="app-footer">
+      <span>Weatherly Smart Weather Monitoring System</span>
+      <div class="footer-mid"><span>◇</span><div class="bar"><div class="fill"></div></div><span>♡</span></div>
+      <span>v1.0.0</span>
+    </footer>
+  </main>
+</div>
+<div class="toast" id="toast">Saved</div>
+ 
+<!-- Firebase (compat) SDK — connects this dashboard to the same Realtime Database the ESP32 firmware uploads to -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+ 
+<script>
+const $ = id => document.getElementById(id);
+const R = 42, CIRC = 2 * Math.PI * R;
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+ 
+function setRing(id, value, min, max){
+  const pct = clamp((value - min) / (max - min), 0, 1);
+  const el = $(id);
+  el.style.strokeDasharray = CIRC;
+  el.style.strokeDashoffset = CIRC * (1 - pct);
+}
+function setStatus(id, text, kind){
+  const el = $(id);
+  el.textContent = text;
+  el.className = 'status-pill' + (kind ? ' ' + kind : '');
+  return el.className;
+}
+ 
+/* ================= SETTINGS (saved in this browser) ================= */
+const DEFAULT_SETTINGS = { name:'My Weather Station', lat:6.9271, lng:79.8612, theme:'dark', staleSec:20, startMode:'normal' };
+let settings = Object.assign({}, DEFAULT_SETTINGS);
+try{
+  const saved = JSON.parse(localStorage.getItem('weatherly_settings') || 'null');
+  if(saved && typeof saved === 'object') Object.assign(settings, saved);
+}catch(e){}
+function persistSettings(){
+  try{ localStorage.setItem('weatherly_settings', JSON.stringify(settings)); }catch(e){}
+}
+document.documentElement.setAttribute('data-theme', settings.theme === 'light' ? 'light' : 'dark');
+ 
+/* ---- ESP32 sketch thresholds (kept identical to the real firmware) ---- */
+const TEMP_HIGH_C = 35.0;
+const HUMID_LOW = 30, HUMID_HIGH = 90;
+const RAIN_HEAVY_PCT = 50; // rain %: 0 = none, 1-50 = light, above 50 = heavy
+const WATER_LOW_RAW = 1200, WATER_HIGH_RAW = 3000;
+const MQ135_BAD_THRESHOLD = 1120;
+const SOIL_WET_THRESHOLD = 2000;
+const CLOUDY_LIMIT = 60;  // cloud cover % at which a daytime sky is dark enough for the LDR to trigger
+ 
+const RANGES = {
+  temp:[10,40], humid:[0,100], pressure:[980,1050], rain:[0,100], water:[0,100], air:[0,500], soil:[0,100], wind:[0,600]
+};
+ 
+function rainPercent(raw){ return clamp(((4095 - raw) / 4095) * 100, 0, 100); }
+function isRainWet(raw){ return Math.round(rainPercent(raw)) > 0; }
+function isRainHeavy(raw){ return Math.round(rainPercent(raw)) > RAIN_HEAVY_PCT; }
+function isRainLight(raw){ return isRainWet(raw) && !isRainHeavy(raw); }
+function waterPercent(raw){ return clamp((raw / 4095) * 100, 0, 100); }
+function soilPercent(raw){ return clamp(((4095 - raw) / 4095) * 100, 0, 100); }
+function aqiValue(raw){ return Math.round(clamp((raw / 4095) * 500, 0, 500)); }
+ 
+/* ================= FIREBASE LIVE CONNECTION ================= *
+ * Same project the ESP32 sketch uploads to (Firebase_ESP_Client, *
+ * path "/sensors"). While this is connecting/unavailable, the    *
+ * dashboard keeps running on the demo simulator below.           */
+const firebaseConfig = {
+  apiKey: "AIzaSyA1TBkZ8RKqCBOip0NPU3JycRCUSt9sy_c",
+  databaseURL: "https://smart-weather-4e565-default-rtdb.firebaseio.com/"
+};
+firebase.initializeApp(firebaseConfig);
+ 
+/* ---- connection badge (Normal mode = live ESP32, Demo mode = manual) ---- */
+function staleMs(){ return Math.max(5, Number(settings.staleSec) || 20) * 1000; }
+function updateConnUI(){
+  const badge = $('connBadge'), note = $('deviceNote');
+  badge.className = 'ds-online';
+  if(mode === 'demo'){
+    badge.classList.add('demo');
+    badge.innerHTML = '<span class="dot"></span>Demo Mode';
+    note.textContent = 'Demo mode — values are set with the sliders (or simulated). ESP32 data is ignored.';
+  } else if(lastLiveData && Date.now() - lastLiveAt < staleMs()){
+    badge.innerHTML = '<span class="dot"></span>Live';
+    note.textContent = 'Connected to the ESP32 via Firebase — showing live sensor data.';
+  } else if(lastLiveData){
+    badge.classList.add('demo');
+    badge.innerHTML = '<span class="dot"></span>Offline';
+    note.textContent = 'No new data from the ESP32 for a while — showing the last reading.';
+  } else {
+    badge.classList.add('demo');
+    badge.innerHTML = '<span class="dot"></span>Connecting…';
+    note.textContent = 'Waiting for the first reading from the ESP32…';
+  }
+  updateDeviceView();
+  updateMapInfo();
+}
+setInterval(()=>{ if(typeof updateConnUI === 'function' && typeof mode !== 'undefined') updateConnUI(); }, 2000);
+ 
+// Raw-ADC-equivalent helpers so live readings can flow through the
+// exact same render()/chart pipeline the demo simulator already uses.
+function rawFromPercentInverted(pct){ return Math.round(4095 * (1 - pct / 100)); } // rain, soil
+function rawFromPercent(pct){ return Math.round(4095 * (pct / 100)); }             // water
+function rawFromAqi(aqi){ return Math.round(4095 * (aqi / 500)); }                 // air
+ 
+function hourIsDay(){ const h = new Date().getHours(); return h >= 6 && h < 18; }
+ 
+function copyLiveToState(d){
+  if(typeof d.temperature === 'number') state.temp = d.temperature;
+  if(typeof d.humidity === 'number') state.humid = d.humidity;
+  if(typeof d.pressure === 'number') state.pressure = d.pressure;
+  if(typeof d.wind_speed_rpm === 'number') state.wind = d.wind_speed_rpm;
+  // The real LDR module: ldr_state HIGH (1) = DARK, LOW (0) = LIGHT (same as the OLED: "LDR:DARK" when HIGH).
+  // On this page state.ldr: 1 = bright, 0 = dark, so the value from the ESP32 is inverted here.
+  if(d.ldr_state !== undefined && d.ldr_state !== null) state.ldr = Number(d.ldr_state) ? 0 : 1;
+  // Lamp is ON whenever it is dark (matches the OLED "LAMP:ON"), so it is taken from the LDR, not the night_light text.
+  state.nightLight = state.ldr === 0;
+ 
+  // LDR bright => daytime. LDR dark => night, unless the clock says it is daytime (then it is a dark, cloudy day).
+  state.daytime = state.ldr === 1 || hourIsDay();
+ 
+  const rainPct = d.rain_status === 'HIGH' ? 90 : d.rain_status === 'LIGHT' ? 30 : 0;
+  state.rain = rawFromPercentInverted(rainPct);
+ 
+  const waterPct = d.water_status === 'HIGH' ? 90 : d.water_status === 'MEDIUM' ? 55 : d.water_status === 'ERROR' ? 0 : 15;
+  state.water = rawFromPercent(waterPct);
+ 
+  const soilPct = typeof d.soil_moisture === 'number' ? d.soil_moisture : (d.soil_status === 'WET' ? 70 : 20);
+  state.soil = rawFromPercentInverted(soilPct);
+ 
+  const aqi = d.air_status === 'BAD' ? 165 : 35;
+  state.air = rawFromAqi(aqi);
+ 
+  $('wifiVal').textContent = 'N/A (not sent)';
+  if(typeof d.water_distance === 'number') $('waterDistVal').textContent = d.water_distance.toFixed(1) + ' cm';
+}
+ 
+function applyLiveData(d){
+  lastLiveData = d;
+  lastLiveAt = Date.now();
+  if(mode !== 'normal'){ updateConnUI(); return; }   // Demo mode ignores the ESP32
+  copyLiveToState(d);
+  $('lastUpdateVal').textContent = fmtTime(new Date());
+  updateConnUI();
+  render();
+}
+ 
+function startFirebaseLive(){
+  firebase.auth().signInWithEmailAndPassword(
+    "jayawardhanaraveesha8@gmail.com",
+    "Prasad321"
+  ).then(() => {
+    firebase.database().ref('/sensors').on('value', snap => {
+      const d = snap.val();
+      if(!d) return;
+      applyLiveData(d);
+    }, err => {
+      console.error('Firebase read failed:', err.message);
+    });
+  }).catch(err => {
+    console.error('Firebase auth failed:', err.message);
+  });
+}
+ 
+const state = { temp:27.8, humid:68, pressure:1015, rain:3235, water:1188, air:0, soil:2375, wind:0, ldr:1, nightLight:false, daytime:true };
+const HISTORY_LEN = 30;
+const history = { temp:[], humid:[], pressure:[], rain:[] };
+function seedHistory(){
+  for(let i=0;i<HISTORY_LEN;i++){
+    history.temp.push(state.temp); history.humid.push(state.humid);
+    history.pressure.push(state.pressure); history.rain.push(state.rain);
+  }
+}
+function pushHistory(){
+  history.temp.push(state.temp); history.humid.push(state.humid);
+  history.pressure.push(state.pressure); history.rain.push(state.rain);
+  Object.keys(history).forEach(k=>{ if(history[k].length > HISTORY_LEN) history[k].shift(); });
+}
+ 
+function toPoints(arr, min, max, w, h){
+  const n = arr.length;
+  return arr.map((v,i)=>{
+    const x = n>1 ? (i/(n-1))*w : 0;
+    const pct = clamp((v-min)/(max-min), 0, 1);
+    return `${x.toFixed(1)},${(h-pct*h).toFixed(1)}`;
+  }).join(' ');
+}
+function toAreaPath(arr, min, max, w, h){
+  const n = arr.length; if(n===0) return '';
+  let d = '';
+  arr.forEach((v,i)=>{
+    const x = n>1 ? (i/(n-1))*w : 0;
+    const pct = clamp((v-min)/(max-min), 0, 1);
+    d += (i===0? `M ${x.toFixed(1)} ${(h-pct*h).toFixed(1)}` : ` L ${x.toFixed(1)} ${(h-pct*h).toFixed(1)}`);
+  });
+  d += ` L ${w} ${h} L 0 ${h} Z`;
+  return d;
+}
+function renderChart(){
+  const W=900,H=190;
+  $('lineTemp').setAttribute('points', toPoints(history.temp, ...RANGES.temp, W, H));
+  $('lineHumid').setAttribute('points', toPoints(history.humid, ...RANGES.humid, W, H));
+  $('linePressure').setAttribute('points', toPoints(history.pressure, ...RANGES.pressure, W, H));
+  $('lineRain').setAttribute('points', toPoints(history.rain.map(rainPercent), ...RANGES.rain, W, H));
+  $('areaTemp').setAttribute('d', toAreaPath(history.temp, ...RANGES.temp, W, H));
+  $('areaHumid').setAttribute('d', toAreaPath(history.humid, ...RANGES.humid, W, H));
+ 
+  const avg = arr => arr.reduce((a,b)=>a+b,0) / arr.length;
+  $('avgTemp').textContent = avg(history.temp).toFixed(1) + '°C';
+  $('avgHumid').textContent = Math.round(avg(history.humid)) + '%';
+  $('avgPressure').textContent = Math.round(avg(history.pressure)) + ' hPa';
+  $('avgRain').textContent = Math.round(avg(history.rain.map(rainPercent))) + '%';
+}
+function renderXLabels(){
+  const now = new Date();
+  const labels = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date(now.getTime() - i*5*60000);
+    labels.push(d.toTimeString().slice(0,5));
+  }
+  $('xLabels').innerHTML = labels.map(l=>`<span>${l}</span>`).join('');
+}
+ 
+/* ---- alerts ---- */
+let alertsLog = [];
+let showAll = false;
+function fmtTime(d){
+  let h = d.getHours(), m = String(d.getMinutes()).padStart(2,'0');
+  const ap = h>=12?'PM':'AM'; h = h%12; if(h===0) h=12;
+  return `${h}:${m} ${ap}`;
+}
+function addAlert(kind, title, desc){
+  alertsLog.unshift({ time: fmtTime(new Date()), kind, title, desc });
+  if(alertsLog.length > 20) alertsLog.pop();
+  renderAlerts();
+}
+function renderAlerts(){
+  const list = showAll ? alertsLog : alertsLog.slice(0,3);
+  $('alertsList').innerHTML = list.length ? list.map(a => `
+    <div class="alert-row">
+      <span class="alert-ic ${a.kind==='ok'?'ok':'warn'}">${a.kind==='ok'?'✓':'⚠'}</span>
+      <div>
+        <div class="alert-time">${a.time}</div>
+        <div class="alert-title">${a.title}</div>
+        <div class="alert-desc">${a.desc}</div>
+      </div>
+      <span class="alert-chev">›</span>
+    </div>`).join('') : '<div class="alert-desc" style="padding:14px 0;">No alerts yet.</div>';
+}
+$('viewAllBtn').addEventListener('click', ()=>{ showAll = !showAll; $('viewAllBtn').textContent = showAll ? 'Show Less' : 'View All'; renderAlerts(); });
+ 
+const prevStatus = {};
+let prevNight, prevLightOn;
+function trackTransition(key, className, okTitle, okDesc, badTitleMap){
+  const isBad = className.includes('alert') || className.includes('warn');
+  const was = prevStatus[key];
+  if(was !== undefined && was !== isBad){
+    if(isBad) addAlert('warn', badTitleMap.title, badTitleMap.desc);
+    else addAlert('ok', okTitle, okDesc);
+  }
+  prevStatus[key] = isBad;
+}
+ 
+/* ---- sky condition: day/night + sunny/cloudy estimate ---- */
+// Higher humidity and lower temperature => more cloud. Simple estimate, 0-100 %.
+function cloudPct(){
+  return Math.round(100 * (clamp((state.humid - 50) / 40, 0, 1) * 0.7 + clamp((30 - state.temp) / 10, 0, 1) * 0.3));
+}
+// Demo mode only: work out what the LDR would read. Night => dark. Day => dark when cloudy or raining.
+// (In Normal mode the real LDR value from the ESP32 is used as-is.)
+function applyDemoLdr(){
+  if(mode !== 'demo') return;
+  if(!state.daytime) state.ldr = 0;
+  else state.ldr = (cloudPct() >= CLOUDY_LIMIT || isRainWet(state.rain)) ? 0 : 1;
+  state.nightLight = state.ldr === 0;
+}
+function computeSky(){
+  const night = !state.daytime;
+  const cloud = cloudPct();
+  const heavy = isRainHeavy(state.rain);
+  const light = isRainLight(state.rain);
+  const per = night ? 'Night' : 'Day';
+  const h = Math.round(state.humid), t = state.temp.toFixed(1);
+  let icon, short, desc;
+  if(heavy){ icon='⛈️'; short='Stormy'; desc='Heavy rain detected by the rain sensor.'; }
+  else if(light){ icon='🌧️'; short='Rainy'; desc='Light rain detected by the rain sensor.'; }
+  else if(cloud < 30){
+    icon = night ? '🌙' : '☀️'; short = night ? 'Clear' : 'Sunny';
+    desc = `Humidity is low (${h}%) at ${t}°C — the sky is clear.`;
+  } else if(cloud < 60){
+    icon = night ? '🌙☁️' : '⛅'; short = 'Partly Cloudy';
+    desc = `Humidity ${h}% at ${t}°C — some cloud in the sky.`;
+  } else {
+    icon = '☁️'; short = 'Cloudy';
+    desc = `Humidity is high (${h}%) at ${t}°C — the sky is overcast.`;
+  }
+  return { night, cloud, icon, short, title: `${short} ${per}`, desc };
+}
+function updateSky(sky){
+  const b = $('skyBanner');
+  const overcastDay = !sky.night && state.ldr === 0;
+  b.classList.toggle('night', sky.night);
+  b.classList.toggle('overcast', overcastDay);
+  b.classList.toggle('day', !sky.night && !overcastDay);
+  $('skyIcon').textContent = sky.icon;
+  $('skyTitle').textContent = sky.title;
+  let desc = sky.desc;
+  if(overcastDay) desc += ' The daylight is dim, so the LDR reads dark and the night light is ON.';
+  $('skyDesc').textContent = desc;
+  $('skyPeriod').textContent = sky.night ? 'Night · LDR reports darkness'
+    : overcastDay ? 'Daytime · LDR reports low light (cloudy)' : 'Daytime · LDR reports daylight';
+  $('skyCloud').textContent = sky.cloud + '%';
+  $('skyWind').textContent = Math.round(state.wind) + ' RPM';
+  $('skyLdr').textContent = state.ldr === 0 ? 'Dark (night light ' + (state.nightLight ? 'ON' : 'OFF') + ')' : 'Bright';
+}
+ 
+/* ---- environmental summary ---- */
+function updateSummary(sTemp, sHumid, sRain, sAir, dP, sWind){
+  const sky = computeSky();
+  $('condVal').textContent = sky.short;
+  $('condIcon').textContent = sky.icon;
+  updateSky(sky);
+ 
+  const comfort = $('comfortVal'), comfortIcon = $('comfortIcon');
+  if(state.temp>32 && state.humid>70){ comfort.textContent='Muggy'; comfortIcon.textContent='😓'; }
+  else if(state.temp>32){ comfort.textContent='Hot'; comfortIcon.textContent='🥵'; }
+  else if(state.temp<18){ comfort.textContent='Cool'; comfortIcon.textContent='🥶'; }
+  else if(state.humid>80){ comfort.textContent='Humid'; comfortIcon.textContent='😓'; }
+  else { comfort.textContent='Comfortable'; comfortIcon.textContent='🙂'; }
+ 
+  $('trendVal').textContent = dP > 0.4 ? 'Rising' : dP < -0.4 ? 'Falling' : 'Stable';
+  $('aqVal').textContent = sAir.includes('BAD') ? 'Bad' : 'Good';
+ 
+  const anyAlert = [sTemp,sHumid,sRain,sAir,sWind].some(c=>c.includes('alert'));
+  const anyWarn = [sTemp,sHumid,sRain,sAir,sWind].some(c=>c.includes('warn'));
+  const banner = $('summaryBanner'), chk = $('summaryChk'), title = $('summaryTitle'), desc = $('summaryDesc');
+  const pill = $('systemsPill');
+  banner.className = 'summary-banner'; pill.className = 'systems-pill';
+  if(anyAlert){
+    banner.classList.add('alert'); chk.textContent='!'; title.textContent='Attention Needed';
+    desc.textContent='One or more sensors are outside their normal range.';
+    pill.classList.add('alert'); pill.textContent='⛔ Attention Needed';
+  } else if(anyWarn){
+    banner.classList.add('warn'); chk.textContent='!'; title.textContent='Minor Warnings';
+    desc.textContent='Some readings are trending outside the usual range.';
+    pill.classList.add('warn'); pill.textContent='⚠ Check Sensors';
+  } else {
+    chk.textContent='✓'; title.textContent='All Systems Normal';
+    desc.textContent='Everything is functioning within normal parameters.';
+    pill.textContent='✓ All Systems Normal';
+  }
+}
+ 
+/* ---- main render ---- */
+function render(){
+  applyDemoLdr();
+ 
+  $('valTemp').textContent = state.temp.toFixed(1);
+  $('valHumid').textContent = Math.round(state.humid);
+  $('valPressure').textContent = Math.round(state.pressure);
+  $('valRain').textContent = Math.round(rainPercent(state.rain));
+  $('valWater').textContent = Math.round(waterPercent(state.water));
+  $('valAir').textContent = aqiValue(state.air);
+  $('valSoil').textContent = Math.round(soilPercent(state.soil));
+ 
+  setRing('ringTemp', state.temp, ...RANGES.temp);
+  setRing('ringHumid', state.humid, ...RANGES.humid);
+  setRing('ringPressure', state.pressure, ...RANGES.pressure);
+  setRing('ringRain', rainPercent(state.rain), ...RANGES.rain);
+  setRing('ringWater', waterPercent(state.water), ...RANGES.water);
+  setRing('ringAir', aqiValue(state.air), ...RANGES.air);
+  setRing('ringSoil', soilPercent(state.soil), ...RANGES.soil);
+ 
+  let sTemp, sHumid, sRain, sWater, sAir, sSoil, sPressure;
+  if(state.temp < 18) sTemp = setStatus('statusTemp','LOW','info');
+  else if(state.temp > TEMP_HIGH_C) sTemp = setStatus('statusTemp','HIGH','alert');
+  else sTemp = setStatus('statusTemp','NORMAL','');
+ 
+  if(state.humid < HUMID_LOW) sHumid = setStatus('statusHumid','LOW','info');
+  else if(state.humid > HUMID_HIGH) sHumid = setStatus('statusHumid','HIGH','warn');
+  else sHumid = setStatus('statusHumid','NORMAL','');
+ 
+  const prevP = history.pressure[history.pressure.length-1] ?? state.pressure;
+  const dP = state.pressure - prevP;
+  if(dP > 0.4) sPressure = setStatus('statusPressure','RISING','info');
+  else if(dP < -0.4) sPressure = setStatus('statusPressure','FALLING','warn');
+  else sPressure = setStatus('statusPressure','STABLE','info');
+ 
+  if(isRainHeavy(state.rain)) sRain = setStatus('statusRain','HEAVY RAIN','alert');
+  else if(isRainWet(state.rain)) sRain = setStatus('statusRain','LIGHT RAIN','warn');
+  else sRain = setStatus('statusRain','NONE','');
+ 
+  if(state.water < WATER_LOW_RAW) sWater = setStatus('statusWater','LOW','info');
+  else if(state.water > WATER_HIGH_RAW) sWater = setStatus('statusWater','HIGH','warn');
+  else sWater = setStatus('statusWater','NORMAL','');
+ 
+  if(state.air >= MQ135_BAD_THRESHOLD) sAir = setStatus('statusAir','BAD','alert');
+  else sAir = setStatus('statusAir','GOOD','');
+ 
+  if(state.soil < SOIL_WET_THRESHOLD) sSoil = setStatus('statusSoil','WET','');
+  else sSoil = setStatus('statusSoil','DRY','warn');
+ 
+  // wind (Hall effect sensor RPM)
+  $('valWind').textContent = Math.round(state.wind);
+  setRing('ringWind', state.wind, ...RANGES.wind);
+  let sWind;
+  if(state.wind < 15) sWind = setStatus('statusWind','CALM','');
+  else if(state.wind < 100) sWind = setStatus('statusWind','BREEZE','info');
+  else if(state.wind < 250) sWind = setStatus('statusWind','WINDY','warn');
+  else sWind = setStatus('statusWind','STRONG','alert');
+  const windLabel = $('statusWind').textContent;
+  $('windTileVal').textContent = Math.round(state.wind) + ' RPM · ' + windLabel.charAt(0) + windLabel.slice(1).toLowerCase();
+ 
+  // light (LDR): night / cloudy day (dark) / bright day
+  const night = !state.daytime;
+  const cloudyDark = !night && state.ldr === 0;
+  const lightOn = !!state.nightLight;
+  setRing('ringLight', 1, 0, 1);
+  $('ringLight').style.stroke = night ? '#9b7bff' : cloudyDark ? '#4aa8ff' : '#f2b544';
+  $('valLight').textContent = night ? '🌙' : cloudyDark ? '☁️' : '☀️';
+  setStatus('statusLight', night ? 'NIGHT' : cloudyDark ? 'CLOUDY' : 'DAY', (night || cloudyDark) ? 'info' : 'warn');
+  $('rangeLight').textContent = 'Night light: ' + (lightOn ? 'ON' : 'OFF');
+  $('dnIcon').textContent = night ? '🌙' : cloudyDark ? '☁️' : '☀️';
+  $('dnVal').textContent = night ? 'Night · Light ' + (lightOn ? 'ON' : 'OFF')
+    : cloudyDark ? 'Day (dim) · Light ' + (lightOn ? 'ON' : 'OFF') : 'Day';
+  if(prevNight !== undefined && prevNight !== night){
+    addAlert('ok', night ? 'Night Detected' : 'Daylight Detected',
+      night ? 'It is dark — night light is ON.' : 'It is daytime again.');
+  }
+  prevNight = night;
+  if(prevLightOn !== undefined && prevLightOn !== lightOn){
+    addAlert('ok', lightOn ? 'Night Light ON' : 'Night Light OFF',
+      lightOn ? (cloudyDark ? 'LDR reports low light — cloudy daytime, light switched ON.' : 'LDR reports darkness — night light is ON.')
+              : 'LDR reports daylight — night light is OFF.');
+  }
+  prevLightOn = lightOn;
+ 
+  trackTransition('rain', sRain, 'Weather Update', 'No rain detected in the last 2 hours.', {title:'Rain Detected', desc:'The rain sensor is now picking up precipitation.'});
+  trackTransition('water', sWater, 'Water Level Restored', 'Water level is back within the normal range.', {title:'Water Level Low', desc:'Water level is getting low. Please check.'});
+  trackTransition('air', sAir, 'Air Quality Normal', 'Air quality has returned to a healthy level.', {title:'Poor Air Quality', desc:'MQ135 is reading elevated gas levels.'});
+  trackTransition('soil', sSoil, 'Soil Moisture Normal', 'Soil moisture has returned to a wet state.', {title:'Soil Getting Dry', desc:'Soil moisture is low — consider watering.'});
+  trackTransition('temp', sTemp, 'Temperature Normal', 'Temperature is back within the normal range.', {title:'High Temperature', desc:'Temperature has exceeded the safe threshold.'});
+ 
+  trackTransition('wind', sWind, 'Wind Calmed', 'Wind speed is back to a normal level.', {title:'Strong Wind', desc:'Wind speed is high — secure outdoor equipment.'});
+ 
+  updateSummary(sTemp, sHumid, sRain, sAir, dP, sWind);
+ 
+  if(mode === 'demo') syncSliders();
+ 
+  pushHistory();
+  renderChart();
+  updateMapInfo();
+  updateDeviceView();
+}
+ 
+/* ---- clock / uptime ---- */
+let uptimeSeconds = 0;
+function tickClock(){
+  uptimeSeconds++;
+  const h = String(Math.floor(uptimeSeconds/3600)).padStart(2,'0');
+  const m = String(Math.floor((uptimeSeconds%3600)/60)).padStart(2,'0');
+  const s = String(uptimeSeconds%60).padStart(2,'0');
+  $('uptimeVal').textContent = `${h}:${m}:${s}`;
+ 
+  const now = new Date();
+  $('clockTime').textContent = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  $('clockDate').textContent = now.toLocaleDateString([], {month:'long', day:'numeric', year:'numeric'});
+  if(!$('view-device').hidden) updateDeviceView();
+}
+setInterval(tickClock, 1000);
+ 
+/* ---- demo simulation ---- */
+function demoStep(){
+  state.pressure = clamp(state.pressure + (Math.random()-0.5)*1.2, 985, 1045);
+  state.temp = clamp(state.temp + (Math.random()-0.5)*0.3, 15, 38);
+  state.humid = clamp(state.humid + (Math.random()-0.6)*0.5, 20, 95);
+  state.rain = clamp(state.rain + (Math.random()-0.5)*260, 0, 4095);
+  const wet = isRainWet(state.rain);
+  state.water = clamp(state.water + (wet ? Math.random()*40 : -Math.random()*18), 0, 4095);
+  state.air = clamp(state.air + (Math.random()-0.45)*180, 0, 4095);
+  state.soil = clamp(state.soil + (wet ? Math.random()*30 : -Math.random()*10), 0, 4095);
+  state.wind = clamp(state.wind + (Math.random()-0.5)*40, 0, 600);
+  $('lastUpdateVal').textContent = fmtTime(new Date());
+  $('wifiVal').textContent = (-58 - Math.round(Math.random()*10)) + ' dBm';
+  render();
+}
+ 
+/* ---- refresh button ---- */
+$('refreshBtn').addEventListener('click', ()=>{
+  $('refreshBtn').classList.add('spin');
+  if(mode === 'demo') demoStep();
+  else if(lastLiveData){ copyLiveToState(lastLiveData); render(); }
+  setTimeout(()=> $('refreshBtn').classList.remove('spin'), 500);
+});
+ 
+/* ================= VIEWS: Dashboard / Map / Settings / Device ================= */
+const VIEWS = ['dashboard','map','settings','device'];
+function showView(v){
+  VIEWS.forEach(n => { $('view-' + n).hidden = (n !== v); });
+  if(v === 'map') loadMap();
+  if(v === 'device') updateDeviceView();
+  if(v === 'settings') fillSettings();
+}
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+    showView(item.getAttribute('data-view') || 'dashboard');
+    const target = item.getAttribute('data-target');
+    if(target && $(target)) $(target).scrollIntoView({behavior:'smooth', block:'start'});
+    else window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+ 
+/* ---- toast ---- */
+let toastTimer;
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+ 
+/* ---- map view: Leaflet map, demo weather model, prediction ---- */
+const PLACES=[
+ {name:'Colombo',lat:6.9271,lng:79.8612,terrain:0.10},{name:'Galle',lat:6.0535,lng:80.2210,terrain:0.15},
+ {name:'Ratnapura',lat:6.6828,lng:80.3992,terrain:0.60},{name:'Kegalle',lat:7.2513,lng:80.3464,terrain:0.75},
+ {name:'Kandy',lat:7.2906,lng:80.6337,terrain:0.75},{name:'Nuwara Eliya',lat:6.9497,lng:80.7891,terrain:0.95},
+ {name:'Badulla',lat:6.9934,lng:81.0550,terrain:0.80},{name:'Anuradhapura',lat:8.3114,lng:80.4037,terrain:0.08},
+ {name:'Jaffna',lat:9.6615,lng:80.0255,terrain:0.04},{name:'Trincomalee',lat:8.5874,lng:81.2152,terrain:0.12}];
+function ihash(a,b){ let h=Math.imul(a|0,374761393)^Math.imul(b|0,668265263); h=Math.imul(h^(h>>>13),1274126177); h^=h>>>16; return (h>>>0)/4294967296; }
+function snoise(seed,t){ const i=Math.floor(t), f=t-i, s=f*f*(3-2*f); return ihash(seed,i)*(1-s)+ihash(seed,i+1)*s; }
+function cellSeed(lat,lng,step,salt){ return Math.imul(Math.round(lat/step)+1000,73856093)^Math.imul(Math.round(lng/step)+1000,19349663)^salt; }
+function dayIndex(s){ const [y,m,d]=s.split('-').map(Number); return Math.floor(Date.UTC(y,m-1,d)/86400000); }
+function terrainAt(lat,lng){
+  const near=PLACES.find(p=>Math.abs(p.lat-lat)<0.12&&Math.abs(p.lng-lng)<0.12);
+  if(near) return near.terrain;
+  const d=Math.hypot(lat-7.0,lng-80.7), hill=Math.max(0,1-d/0.75);
+  return clamp(Math.max(ihash(Math.round(lat*10),Math.round(lng*10))*0.35,hill*0.95),0,1);
+}
+function dayWeather(p,di){
+  let n=snoise(cellSeed(p.lat,p.lng,0.5,11),di/2.6)*0.75+snoise(cellSeed(p.lat,p.lng,0.05,23),di/2.0+7.3)*0.25;
+  n=clamp((n-0.5)*1.6+0.5,0,1);
+  const rain=n<0.66?0:Math.round(Math.pow((n-0.66)/0.34,1.7)*100);
+  let wind=8+22*snoise(cellSeed(p.lat,p.lng,0.5,37),di/3.1)+rain*0.18;
+  const sp=snoise(cellSeed(p.lat,p.lng,0.5,41),di/4.0+3.1);
+  if(sp>0.7) wind+=(sp-0.7)/0.3*55;
+  wind=Math.round(clamp(wind,0,140));
+  const temp=31-p.terrain*10+(snoise(cellSeed(p.lat,p.lng,0.5,53),di/3.4)-0.5)*5-rain*0.05;
+  return {rain,wind,temp:Math.round(temp*10)/10,di};
+}
+const RISK_NAMES = ['LOW','WATCH','WARNING','SEVERE'];
+const RISK_COLORS = ['#3fe6a8','#f2b544','#ff9440','#ff5c6c'];
+const CUTS = [35,55,72];
+function lvl(sc){ return sc>=CUTS[2]?3 : sc>=CUTS[1]?2 : sc>=CUTS[0]?1 : 0; }
+function terrainLabel(t){ return t>=0.7 ? 'Mountainous' : t>=0.35 ? 'Hilly' : 'Flat / lowland'; }
+function rainCat(r){ return r<=0 ? 'None' : r<=RAIN_HEAVY_PCT ? 'Light' : 'Heavy'; }
+function windCat(w){ return w<20?'Calm':w<35?'Breezy':w<50?'Windy':w<70?'Strong':'Very strong'; }
+function rainRisk(r, terrain){ // r = rain % for [today, yesterday, ...]
+  const api = (r[0] + r[1]*0.7 + r[2]*0.5 + r[3]*0.3 + r[4]*0.15) / 2.65; // rain build-up (soil/river saturation)
+  let st = 0; for(const x of r){ if(x > RAIN_HEAVY_PCT) st++; else break; } // consecutive heavy-rain days
+  const base = Math.min(st,4)*5;
+  const fs = clamp(api*0.7 + r[0]*0.3 + base, 0, 100);
+  const ls = clamp((api*0.75 + r[0]*0.25 + base) * (0.5 + 0.7*terrain), 0, 100);
+  return { api, streak:st, flood:{score:fs, level:lvl(fs)}, land:{score:ls, level:lvl(ls)} };
+}
+function windLevel(w, prev){ let l = w>=70?3 : w>=50?2 : w>=35?1 : 0; if(l>0 && l<3 && w-prev>=15) l++; return l; }
+ 
+/* ---- real weather data (Open-Meteo, free, no key) ---- */
+// Rain % = daily rainfall / 80 mm (so "heavy", above 50%, is about 40 mm a day or more)
+function mmToPct(mm){ if(mm==null) return null; if(mm<0.1) return 0; return Math.max(1, Math.round(clamp(mm/80*100,0,100))); }
+let dataMode = 'real', realFail = '', reqToken = 0;
+let lmap=null, stationMk=null, placeMks=[], selMk=null, mapSel=null, mapLoadedFor='';
+const realCache = {}, elevCache = {};
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+let mapDate = todayStr();
+function shiftDate(str,n){ return new Date((dayIndex(str)+n)*86400000).toISOString().slice(0,10); }
+function dayLabel(di){ return new Date(di*86400000).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',timeZone:'UTC'}); }
+function longDate(str){ return new Date(dayIndex(str)*86400000).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}); }
+function stationPlace(){ const lat=Number(settings.lat), lng=Number(settings.lng); return { name:(settings.name||'Station')+' (station)', lat, lng, terrain:terrainAt(lat,lng) }; }
+function placeKey(pl){ return pl.lat.toFixed(3)+','+pl.lng.toFixed(3); }
+function nullDay(di){ return { di, mm:null, rain:null, wind:null, temp:null }; }
+function validHist(D){ return D.slice(0,5).every(d=>d && d.rain!=null && d.wind!=null); }
+function fmtT(t){ return t==null ? '--' : t.toFixed(1); }
+function terrainFor(pl, real){ const e = elevCache[placeKey(pl)]; return (real && e!=null) ? clamp(e/1000,0,1) : pl.terrain; }
+ 
+// daily data for one or more places between two dates -> one {date: day} map per place
+async function fetchDaily(places, start, end){
+  const today = todayStr(), T = dayIndex(today);
+  const useArchive = dayIndex(start) < T - 90;
+  let e = end;
+  if(useArchive){ if(dayIndex(e) > T-7) e = shiftDate(today,-7); }
+  else if(dayIndex(e) > T+15) e = shiftDate(today,15);
+  const base = useArchive ? 'https://archive-api.open-meteo.com/v1/archive' : 'https://api.open-meteo.com/v1/forecast';
+  const url = base + '?latitude=' + places.map(p=>p.lat.toFixed(4)).join(',') + '&longitude=' + places.map(p=>p.lng.toFixed(4)).join(',')
+    + '&daily=temperature_2m_mean,precipitation_sum,wind_speed_10m_max&timezone=auto&start_date=' + start + '&end_date=' + e;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  let js = await res.json();
+  if(!Array.isArray(js)) js = [js];
+  return places.map((pl,i)=>{
+    const o = js[i] || {}, dd = o.daily || { time:[] }, m = {};
+    if(o.elevation != null) elevCache[placeKey(pl)] = o.elevation;
+    dd.time.forEach((t,j)=>{
+      const mm = dd.precipitation_sum ? dd.precipitation_sum[j] : null;
+      const w = dd.wind_speed_10m_max ? dd.wind_speed_10m_max[j] : null;
+      const tp = dd.temperature_2m_mean ? dd.temperature_2m_mean[j] : null;
+      m[t] = { di:dayIndex(t), mm, rain:mmToPct(mm), wind:(w==null ? null : Math.round(w)), temp:(tp==null ? null : Math.round(tp*10)/10) };
+    });
+    return m;
+  });
+}
+async function ensureReal(date){
+  const list = [], seen = {};
+  PLACES.concat([stationPlace()], [mapSel]).forEach(pl=>{
+    const k = placeKey(pl);
+    if(!seen[k]){ seen[k] = 1; if(!realCache[k+'|'+date]) list.push(pl); }
+  });
+  if(!list.length) return;
+  const res = await fetchDaily(list, shiftDate(date,-4), shiftDate(date,2));
+  const di = dayIndex(date);
+  list.forEach((pl,i)=>{
+    const days = [];
+    for(let k=-4;k<=2;k++) days.push(res[i][shiftDate(date,k)] || nullDay(di+k));
+    realCache[placeKey(pl)+'|'+date] = days;
+  });
+}
+// 7 days around the date: 4 before, the day itself, 2 after
+function seriesFor(pl, date, forceDemo){
+  if(dataMode==='real' && !forceDemo){
+    const c = realCache[placeKey(pl)+'|'+date];
+    if(c && validHist(c)) return { days:c, src:'real' };
+  }
+  const di = dayIndex(date), days = [];
+  for(let k=-4;k<=2;k++){ const d = dayWeather(pl,di+k); days.push({ di:di+k, rain:d.rain, mm:Math.round(d.rain*0.8*10)/10, wind:d.wind, temp:d.temp }); }
+  return { days, src:'demo' };
+}
+function assessDays(D, terr){
+  const r = [D[4].rain, D[3].rain, D[2].rain, D[1].rain, D[0].rain]; // today first
+  const w0 = D[4].wind, w1 = D[3].wind;
+  const now = rainRisk(r, terr);
+  const out = [];
+  for(let i=0;i<2;i++){
+    const f = D[5+i], have = !!f && f.rain!=null && f.wind!=null;
+    const pw = i===0 ? w0 : out[0].w, pw2 = i===0 ? w1 : w0;
+    const rr = have ? f.rain : r[0];
+    const ww = have ? f.wind : Math.round(clamp(pw+(pw-pw2)*0.6,0,140)); // no forecast: assume the trend continues
+    const arr = i===0 ? [rr,r[0],r[1],r[2],r[3]] : [rr,out[0].rain,r[0],r[1],r[2]];
+    const risk = rainRisk(arr, terr);
+    out.push({ di:D[4].di+i+1, rain:rr, mm:(have ? f.mm : null), w:ww, flood:risk.flood.level, land:risk.land.level, wind:windLevel(ww,pw), real:have });
+  }
+  const wl = windLevel(w0,w1);
+  return { days:D.slice(0,5), now, wind:{ level:wl, rising:(w0-w1)>=15, w:w0 }, out, max:Math.max(now.flood.level, now.land.level, wl), terr };
+}
+function assess(pl, date, forceDemo){
+  const sr = seriesFor(pl, date, forceDemo);
+  const a = assessDays(sr.days, terrainFor(pl, sr.src==='real'));
+  a.src = sr.src; a.elev = sr.src==='real' ? elevCache[placeKey(pl)] : null;
+  return a;
+}
+ 
+function initLeaflet(lat,lng){
+  lmap = L.map('leafletMap').setView([lat,lng], 8);
+  const street = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri'});
+  const topo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri'});
+  const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri'});
+  street.addTo(lmap);
+  L.control.layers({'Street':street,'Topographic':topo,'Satellite':sat},null,{position:'topright'}).addTo(lmap);
+  placeMks = PLACES.map(pl=>{
+    const m = L.circleMarker([pl.lat,pl.lng],{radius:7,color:'#0b1220',weight:1.5,fillColor:'#3fe6a8',fillOpacity:.95}).addTo(lmap);
+    m.bindTooltip(pl.name);
+    m.on('click', e=>{ L.DomEvent.stopPropagation(e); selectPlace(pl,true); });
+    return m;
+  });
+  stationMk = L.circleMarker([lat,lng],{radius:9,color:'#ffffff',weight:2.5,fillColor:'#3fd0f0',fillOpacity:1}).addTo(lmap);
+  stationMk.bindTooltip('📡 Station');
+  stationMk.on('click', e=>{ L.DomEvent.stopPropagation(e); selectPlace(stationPlace(),true); });
+  lmap.on('click', e=>{
+    const la=+e.latlng.lat.toFixed(4), lo=+e.latlng.lng.toFixed(4);
+    selectPlace({ name:'Selected point', lat:la, lng:lo, terrain:terrainAt(la,lo) }, true);
+  });
+}
+function loadMap(){
+  const lat = Number(settings.lat), lng = Number(settings.lng);
+  const key = lat + ',' + lng;
+  $('mpName').textContent = settings.name;
+  $('mpLat').textContent = lat.toFixed(4);
+  $('mpLng').textContent = lng.toFixed(4);
+  $('mapGoogle').href = `https://www.google.com/maps?q=${lat},${lng}`;
+  if(typeof L === 'undefined'){
+    $('mapMsg').textContent = 'The map library could not load (internet needed). You can still pick a place from the Place list.';
+  } else {
+    if(!lmap) initLeaflet(lat,lng);
+    if(mapLoadedFor !== key){ lmap.setView([lat,lng],8); stationMk.setLatLng([lat,lng]); mapSel = null; }
+    setTimeout(()=> lmap.invalidateSize(), 60);
+  }
+  mapLoadedFor = key;
+  if(!mapSel) mapSel = stationPlace();
+  fillPlaceSelect();
+  applyDateLimits();
+  refreshMap();
+  updateMapInfo();
+}
+function fillPlaceSelect(){
+  const st = stationPlace();
+  const opts = ['<option value="station">📡 '+st.name+'</option>']
+    .concat(PLACES.map((pl,i)=>'<option value="p'+i+'">'+pl.name+'</option>'))
+    .concat(['<option value="custom" hidden>Clicked point</option>']);
+  $('mapPlaceSel').innerHTML = opts.join('');
+  syncPlaceSelect();
+}
+function syncPlaceSelect(){
+  const i = PLACES.findIndex(pl=>pl.name===mapSel.name && pl.lat===mapSel.lat);
+  $('mapPlaceSel').value = mapSel.name.indexOf('(station)')>-1 ? 'station' : i>-1 ? 'p'+i : 'custom';
+}
+function applyDateLimits(){
+  const inp = $('mapDate');
+  inp.min = '1980-01-01';
+  if(dataMode==='real'){
+    const max = shiftDate(todayStr(),13); // the forecast reaches about 15 days ahead and the outlook needs 2 more days
+    inp.max = max;
+    if(dayIndex(mapDate) > dayIndex(max)) mapDate = max;
+  } else inp.removeAttribute('max');
+}
+async function refreshMap(){
+  if(!mapSel) return;
+  const tok = ++reqToken;
+  if(dataMode==='real'){
+    $('predSub').textContent = 'Loading real weather data…';
+    try{ await ensureReal(mapDate); realFail = ''; }
+    catch(e){ realFail = String((e && e.message) || e); }
+    if(tok !== reqToken) return;
+  }
+  renderMapAll();
+}
+async function selectPlace(pl, fromMap){
+  mapSel = pl; syncPlaceSelect();
+  await refreshMap();
+  if(fromMap && lmap){
+    const d = seriesFor(pl, mapDate).days[4];
+    L.popup().setLatLng([pl.lat,pl.lng]).setContent(
+      '<b>'+pl.name+'</b><br>🌧 '+d.rain+'% ('+rainCat(d.rain)+') · 💨 '+d.wind+' km/h · 🌡 '+fmtT(d.temp)+' °C'
+    ).openOn(lmap);
+  }
+}
+function setMapDate(str){
+  if(dataMode==='real'){
+    const max = shiftDate(todayStr(),13);
+    if(dayIndex(str) > dayIndex(max)){ str = max; toast('Real forecast data reaches only about 2 weeks ahead'); }
+  }
+  mapDate = str; if(lmap) lmap.closePopup(); refreshMap();
+}
+ 
+function riskColorStyle(l){ return '--rc:'+RISK_COLORS[l]+';'; }
+function spellText(st){ return st>0 ? 'Heavy rain for '+st+' day'+(st>1?'s':'')+' in a row' : 'Repeated rain over the last few days'; }
+function outlookChips(a, key){
+  return '<div class="outlook">Next:'
+    + [24,48].map((h,i)=>'<span class="o" style="'+riskColorStyle(a.out[i][key])+'">'+h+'h '+RISK_NAMES[a.out[i][key]]+'</span>').join('')
+    + '</div>';
+}
+function srcNote(a){
+  if(dataMode==='demo') return 'Demo values (simulated). Change the date and they change.';
+  if(a.src==='real') return 'Real data from Open-Meteo (daily values). Rain % = daily rainfall ÷ 80 mm, so heavy (above 50%) means about 40 mm a day or more.';
+  return 'Real data could not be loaded'+(realFail ? ' ('+realFail+')' : '')+', so demo values are shown for now.';
+}
+function terrainText(a){ return terrainLabel(a.terr) + (a.elev!=null ? ' · '+Math.round(a.elev)+' m' : ''); }
+function renderSelected(a){
+  const t = a.days[4];
+  $('spName').textContent = mapSel.name;
+  $('spCoord').textContent = mapSel.lat.toFixed(3)+', '+mapSel.lng.toFixed(3);
+  $('spDate').textContent = longDate(mapDate);
+  $('spTerrain').textContent = terrainText(a);
+  $('spRain').textContent = t.rain+' % · '+rainCat(t.rain)+(a.src==='real' && t.mm!=null ? ' ('+t.mm+' mm)' : '');
+  $('spWind').textContent = t.wind+' km/h · '+windCat(t.wind);
+  $('spTemp').textContent = fmtT(t.temp)+' °C';
+  $('spNote').textContent = srcNote(a);
+}
+function renderPrediction(a){
+  const f=a.now.flood, ld=a.now.land, wl=a.wind, st=a.now.streak, t=a.days[4];
+  const spell = spellText(st);
+  const floodMsg = [
+    'No flood concern. Recent rainfall is low.',
+    'Rain is building up. Keep an eye on rivers, drains and low-lying roads.',
+    spell+' (rain build-up '+Math.round(a.now.api)+'%). Flash floods are possible in low-lying areas.',
+    spell+'. The ground and rivers are saturated, so flooding is likely in low-lying areas.'
+  ][f.level];
+  const flat = a.terr < 0.35;
+  const landMsg = [
+    flat ? 'Soil is not saturated and the terrain is flat. Landslides are unlikely.' : 'Soil is not saturated. No landslide concern right now.',
+    flat ? 'Soil is getting wet, but flat terrain keeps landslide risk low.' : 'Soil is getting wet on slopes. Watch for cracks, muddy water and leaning trees or poles.',
+    spell+'. The soil is saturating, so landslides are possible on slopes. Avoid steep hillsides and cut slopes.',
+    spell+'. The soil is saturated, so landslides are likely on steep slopes. Move away from hillsides if advised.'
+  ][ld.level];
+  const rise = wl.rising ? ' and rising' : '';
+  const windMsg = [
+    'Winds are calm to light ('+wl.w+' km/h).',
+    'Gusty winds ('+wl.w+' km/h'+(wl.rising?', rising':'')+').',
+    'Strong winds ('+wl.w+' km/h'+rise+'). A whirlwind is possible in open areas. Secure loose objects.',
+    'Very strong winds ('+wl.w+' km/h'+rise+'). A whirlwind or cyclone-type vortex is possible. Stay indoors, away from trees and loose structures.'
+  ][wl.level];
+  const card = (icon,title,level,score,msg,extra,chips)=>
+    '<div class="risk-card" style="'+riskColorStyle(level)+'"><div class="risk-head"><span>'+icon+' '+title+'</span><span class="risk-pill">'+RISK_NAMES[level]+'</span></div>'
+    + '<div class="risk-bar"><i style="width:'+Math.round(clamp(score,3,100))+'%"></i></div>'
+    + '<div class="risk-msg">'+msg+'</div>'+(extra?'<div class="risk-msg" style="margin-top:6px;">'+extra+'</div>':'')+chips+'</div>';
+  $('predCards').innerHTML =
+      card('🌊','Flood',f.level,f.score,floodMsg,'',outlookChips(a,'flood'))
+    + card('⛰','Landslide',ld.level,ld.score,landMsg,'Terrain here: '+terrainText(a),outlookChips(a,'land'))
+    + card('🌪','Whirlwind',wl.level,Math.min(100,wl.w/80*100),windMsg,'',outlookChips(a,'wind'));
+  const names = ['Flood','Landslide','Whirlwind'], lv = [f.level, ld.level, wl.level];
+  const top = a.max, topNames = names.filter((n,i)=>lv[i]===top).join(' + ');
+  $('predBanner').setAttribute('style', riskColorStyle(top));
+  $('predBanner').innerHTML = top===0
+    ? '✅ <b>All clear.</b> No flood, landslide or whirlwind risk for this date.'
+    : '⚠️ <b>Overall: '+RISK_NAMES[top]+'</b> · '+topNames+'. '+(st>=2 ? 'Heavy rain has now lasted '+st+' days, so the prediction has been raised.' : 'Based on the last 5 days of rain and wind'+(a.src==='real'?' (real data).':'.'));
+  $('predSub').textContent = mapSel.name+' · '+longDate(mapDate)+' · '+t.rain+'% rain, '+t.wind+' km/h wind'+(a.src==='real'?' · real data':' · demo data');
+  const hist = a.days.map((d,i)=>({ label:dayLabel(d.di), rain:d.rain, mm:(a.src==='real'?d.mm:null), wind:d.wind, today:i===4, fc:false }));
+  a.out.forEach(o=>hist.push({ label:dayLabel(o.di), rain:o.rain, mm:(a.src==='real'?o.mm:null), wind:o.w, today:false, fc:true }));
+  $('predHist').innerHTML = hist.map(h=>
+    '<div class="col'+(h.fc?' fc':'')+(h.today?' today':'')+'"><span>'+h.rain+'%</span>'
+    + (h.mm!=null ? '<span style="opacity:.7;font-size:9.5px;">'+h.mm+'mm</span>' : '')
+    + '<div class="bar'+(h.rain>RAIN_HEAVY_PCT?' heavy':'')+'" style="height:'+Math.max(2,h.rain*1.1)+'px"></div>'
+    + '<span>'+h.label+(h.today?' ●':'')+'</span><span>💨'+h.wind+'</span></div>').join('');
+  $('predNote').textContent = a.src==='real'
+    ? 'Weather values are real (Open-Meteo: recorded for past dates, forecast for future dates). The risk levels come from a simple rule-based model, not an official warning. For real warnings, follow your national meteorology and disaster management authorities.'
+    : 'Demo values are simulated and the model is simple. This is not a real forecast. For real warnings, follow your national meteorology and disaster management authorities.';
+}
+function renderMapAll(){
+  if(!mapSel) return;
+  $('mapDate').value = mapDate;
+  $('mapMode').value = dataMode;
+  const a = assess(mapSel, mapDate);
+  renderSelected(a); renderPrediction(a);
+  if(lmap){
+    PLACES.forEach((pl,i)=>{
+      const w = seriesFor(pl,mapDate).days[4], lv = assess(pl,mapDate).max;
+      placeMks[i].setStyle({fillColor:RISK_COLORS[lv]});
+      placeMks[i].setTooltipContent(pl.name+' · 🌧 '+w.rain+'% · 💨 '+w.wind+' km/h');
+    });
+    const sp = stationPlace(), sw = seriesFor(sp,mapDate).days[4];
+    stationMk.setStyle({fillColor:RISK_COLORS[assess(sp,mapDate).max]});
+    stationMk.setTooltipContent('📡 Station · 🌧 '+sw.rain+'% · 💨 '+sw.wind+' km/h');
+    if(!selMk) selMk = L.circleMarker([mapSel.lat,mapSel.lng],{radius:14,color:'#ffffff',weight:2,fill:false,interactive:false,dashArray:'4 4'}).addTo(lmap);
+    selMk.setLatLng([mapSel.lat,mapSel.lng]);
+  }
+}
+// find the next date that matches (real mode: searches the real forecast, demo mode: the simulated year)
+async function findReal(test, label){
+  const today = todayStr(), maxEnd = shiftDate(today,15);
+  const from = shiftDate(mapDate,1);
+  let to = shiftDate(mapDate,45);
+  if(dayIndex(to) > dayIndex(maxEnd)) to = maxEnd;
+  if(dayIndex(from) > dayIndex(to)){ toast('Forecast data ends on '+longDate(maxEnd)); return; }
+  toast('Searching the real forecast…');
+  let map;
+  try{ map = (await fetchDaily([mapSel], shiftDate(from,-4), shiftDate(to,2)))[0]; }
+  catch(e){ toast('Could not load real data ('+((e && e.message) || e)+')'); return; }
+  const terr = terrainFor(mapSel, true);
+  for(let d=from; dayIndex(d)<=dayIndex(to); d=shiftDate(d,1)){
+    const D = []; for(let k=-4;k<=2;k++) D.push(map[shiftDate(d,k)] || nullDay(dayIndex(d)+k));
+    if(!validHist(D)) continue;
+    if(test(assessDays(D,terr))){ setMapDate(d); toast(label+': '+longDate(d)); return; }
+  }
+  toast('Not found in the available forecast (up to '+longDate(to)+')');
+}
+function findDate(test, label){
+  if(dataMode==='real') return findReal(test, label);
+  for(let k=1;k<=365;k++){
+    const d = shiftDate(mapDate,k);
+    if(test(assess(mapSel,d,true))){ setMapDate(d); toast(label+': '+longDate(d)); return; }
+  }
+  toast('No such date found in the next 365 days for this place');
+}
+$('mapPrev').addEventListener('click', ()=> setMapDate(shiftDate(mapDate,-1)));
+$('mapNext').addEventListener('click', ()=> setMapDate(shiftDate(mapDate,1)));
+$('mapToday').addEventListener('click', ()=> setMapDate(todayStr()));
+$('mapDate').addEventListener('change', e=>{ if(e.target.value) setMapDate(e.target.value); });
+$('mapMode').addEventListener('change', e=>{ dataMode = e.target.value; applyDateLimits(); refreshMap(); });
+$('mapPlaceSel').addEventListener('change', e=>{
+  const v = e.target.value;
+  if(v==='station') selectPlace(stationPlace(), false);
+  else if(v[0]==='p') selectPlace(PLACES[+v.slice(1)], false);
+  if(lmap && mapSel) lmap.panTo([mapSel.lat,mapSel.lng]);
+});
+$('mapFindRain').addEventListener('click', ()=> findDate(a=>a.now.flood.level>=2 && a.now.streak>=2, 'Heavy-rain spell'));
+$('mapFindWind').addEventListener('click', ()=> findDate(a=>a.wind.level>=2, 'Whirlwind risk'));
+function updateMapInfo(){
+  if($('view-map').hidden) return;
+  const sky = computeSky();
+  $('mpName').textContent = settings.name;
+  $('mpConn').textContent = $('connBadge').textContent.trim();
+  $('mpCond').textContent = sky.icon + ' ' + sky.title;
+  $('mpTemp').textContent = state.temp.toFixed(1) + ' °C';
+  $('mpHumid').textContent = Math.round(state.humid) + ' %';
+  $('mpRain').textContent = Math.round(rainPercent(state.rain)) + ' %';
+}
+$('mapLocate').addEventListener('click', ()=>{
+  const msg = $('mapMsg');
+  if(!navigator.geolocation){ msg.textContent = 'This browser cannot share your location.'; return; }
+  msg.textContent = 'Asking for your location…';
+  navigator.geolocation.getCurrentPosition(pos => {
+    settings.lat = +pos.coords.latitude.toFixed(4);
+    settings.lng = +pos.coords.longitude.toFixed(4);
+    persistSettings();
+    loadMap();
+    msg.textContent = 'Station location updated to where you are now.';
+  }, err => {
+    msg.textContent = 'Could not get your location (' + err.message + '). Set it manually in Settings.';
+  }, { timeout: 10000 });
+});
+ 
+/* ---- device info view ---- */
+function updateDeviceView(){
+  if(!$('view-device') || $('view-device').hidden) return;
+  $('dvStatus').textContent = $('connBadge').textContent.trim();
+  $('dvMode').textContent = mode === 'demo' ? 'Demo (manual)' : 'Normal (live ESP32)';
+  $('dvUptime').textContent = $('uptimeVal').textContent;
+  $('dvLast').textContent = $('lastUpdateVal').textContent;
+  $('dvWifi').textContent = $('wifiVal').textContent;
+  $('dvWater').textContent = $('waterDistVal').textContent;
+  $('dvNight').textContent = state.nightLight ? 'ON' : 'OFF';
+  $('dvRaw').textContent = lastLiveData ? JSON.stringify(lastLiveData, null, 2) : 'No reading received yet.';
+}
+ 
+/* ---- settings view ---- */
+function fillSettings(){
+  $('setName').value = settings.name;
+  $('setLat').value = settings.lat;
+  $('setLng').value = settings.lng;
+  $('setTheme').value = settings.theme;
+  $('setStale').value = settings.staleSec;
+  $('setMode').value = settings.startMode;
+}
+function applySettings(){
+  document.documentElement.setAttribute('data-theme', settings.theme === 'light' ? 'light' : 'dark');
+  $('welcomeSub').textContent = "Here's what's happening at " + settings.name + ".";
+  mapLoadedFor = '';
+  updateConnUI();
+}
+$('setSave').addEventListener('click', ()=>{
+  const lat = parseFloat($('setLat').value), lng = parseFloat($('setLng').value);
+  if(!isFinite(lat) || lat < -90 || lat > 90 || !isFinite(lng) || lng < -180 || lng > 180){
+    toast('Enter a latitude between -90 and 90 and a longitude between -180 and 180.');
+    return;
+  }
+  settings.name = $('setName').value.trim() || DEFAULT_SETTINGS.name;
+  settings.lat = lat; settings.lng = lng;
+  settings.theme = $('setTheme').value;
+  settings.staleSec = clamp(parseInt($('setStale').value, 10) || DEFAULT_SETTINGS.staleSec, 5, 600);
+  settings.startMode = $('setMode').value;
+  persistSettings();
+  applySettings();
+  fillSettings();
+  toast('Settings saved');
+});
+$('setReset').addEventListener('click', ()=>{
+  settings = Object.assign({}, DEFAULT_SETTINGS);
+  persistSettings(); applySettings(); fillSettings();
+  toast('Settings reset to defaults');
+});
+$('setClearAlerts').addEventListener('click', ()=>{
+  alertsLog = []; renderAlerts();
+  toast('Alerts cleared');
+});
+ 
+/* ---- theme toggle (sidebar) ---- */
+$('themeSwitch').addEventListener('click', ()=>{
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme')==='light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  settings.theme = next; persistSettings();
+  if(!$('view-settings').hidden) $('setTheme').value = next;
+});
+ 
+/* ================= MODES: NORMAL (live) / DEMO (manual) ================= */
+let mode = 'normal';
+try{
+  const m = localStorage.getItem('weatherly_mode');
+  mode = (m === 'demo' || m === 'normal') ? m : settings.startMode;
+}catch(e){ mode = settings.startMode; }
+let lastLiveData = null, lastLiveAt = 0, demoTimer = null, activeSlider = null;
+const DEFAULT_STATE = Object.assign({}, state);
+ 
+const SLIDERS = [
+  { key:'temp',     label:'🌡️ Temperature',  unit:' °C',  min:10,  max:40,   step:0.1, get:()=>state.temp,                 set:v=>{ state.temp = v; },     fmt:v=>v.toFixed(1) },
+  { key:'humid',    label:'💧 Humidity',      unit:' %',   min:0,   max:100,  step:1,   get:()=>state.humid,                set:v=>{ state.humid = v; },    fmt:v=>Math.round(v) },
+  { key:'pressure', label:'🧭 Pressure',      unit:' hPa', min:980, max:1050, step:0.5, get:()=>state.pressure,             set:v=>{ state.pressure = v; }, fmt:v=>v.toFixed(1) },
+  { key:'rain',     label:'☔ Rain',           unit:' %',   min:0,   max:100,  step:1,   get:()=>rainPercent(state.rain),    set:v=>{ state.rain = rawFromPercentInverted(v); }, fmt:v=>Math.round(v) },
+  { key:'water',    label:'🌊 Water Level',   unit:' %',   min:0,   max:100,  step:1,   get:()=>waterPercent(state.water),  set:v=>{ state.water = rawFromPercent(v); },        fmt:v=>Math.round(v) },
+  { key:'air',      label:'💭 Air Quality',   unit:' AQI', min:0,   max:500,  step:1,   get:()=>aqiValue(state.air),        set:v=>{ state.air = rawFromAqi(v); },              fmt:v=>Math.round(v) },
+  { key:'soil',     label:'🌱 Soil Moisture', unit:' %',   min:0,   max:100,  step:1,   get:()=>soilPercent(state.soil),    set:v=>{ state.soil = rawFromPercentInverted(v); }, fmt:v=>Math.round(v) },
+  { key:'wind',     label:'🌬️ Wind Speed',    unit:' RPM', min:0,   max:600,  step:5,   get:()=>state.wind,                 set:v=>{ state.wind = v; },     fmt:v=>Math.round(v) }
+];
+ 
+// daytime:true => day, false => night. The LDR value is worked out automatically in demo mode (applyDemoLdr):
+// night => dark, cloudy/rainy day => dark, clear day => bright.
+const PRESETS = {
+  sunnyDay:    { temp:33,   humid:48, pressure:1018, rain:0,   water:20, air:60,  soil:30, wind:60,  daytime:true  },
+  cloudyDay:   { temp:26,   humid:85, pressure:1008, rain:0,  water:30, air:80,  soil:55, wind:90,  daytime:true  },
+  clearNight:  { temp:24,   humid:48, pressure:1016, rain:0,   water:20, air:50,  soil:35, wind:20,  daytime:false },
+  cloudyNight: { temp:25,   humid:88, pressure:1009, rain:0,  water:30, air:70,  soil:55, wind:70,  daytime:false },
+  rainyNight:  { temp:24,   humid:92, pressure:1004, rain:40, water:55, air:60,  soil:65, wind:120, daytime:false },
+  storm:       { temp:23,   humid:95, pressure:995,  rain:85, water:85, air:90,  soil:80, wind:380, daytime:false }
+};
+ 
+function buildSliders(){
+  $('sliderGrid').innerHTML = SLIDERS.map(s => `
+    <div class="sl">
+      <div class="sl-top"><span>${s.label}</span><span class="v" id="slv_${s.key}">--</span></div>
+      <input type="range" id="sl_${s.key}" min="${s.min}" max="${s.max}" step="${s.step}">
+    </div>`).join('');
+  SLIDERS.forEach(s => {
+    const el = $('sl_' + s.key);
+    el.addEventListener('input', () => {
+      activeSlider = el;
+      const v = parseFloat(el.value);
+      s.set(v);
+      $('slv_' + s.key).textContent = s.fmt(v) + s.unit;
+      $('lastUpdateVal').textContent = fmtTime(new Date());
+      render();
+    });
+    el.addEventListener('change', () => { activeSlider = null; });
+  });
+}
+function syncSliders(){
+  SLIDERS.forEach(s => {
+    const el = $('sl_' + s.key);
+    if(!el || el === activeSlider) return;
+    const v = s.get();
+    el.value = v;
+    $('slv_' + s.key).textContent = s.fmt(v) + s.unit;
+  });
+  $('ldrDay').classList.toggle('active', state.daytime);
+  $('ldrNight').classList.toggle('active', !state.daytime);
+}
+function setDaytime(isDay){
+  state.daytime = isDay;
+  $('lastUpdateVal').textContent = fmtTime(new Date());
+  render();   // render() -> applyDemoLdr() decides LDR / night light from time of day + cloud cover
+}
+function applyPreset(name){
+  const P = PRESETS[name]; if(!P) return;
+  SLIDERS.forEach(s => s.set(P[s.key]));
+  state.daytime = P.daytime;
+  $('lastUpdateVal').textContent = fmtTime(new Date());
+  render();
+}
+ 
+function setMode(m){
+  mode = m;
+  try{ localStorage.setItem('weatherly_mode', m); }catch(e){}
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+  $('demoPanel').hidden = (m !== 'demo');
+ 
+  if(demoTimer){ clearInterval(demoTimer); demoTimer = null; }
+  Object.keys(prevStatus).forEach(k => delete prevStatus[k]);
+  prevNight = undefined; prevLightOn = undefined;
+ 
+  if(m === 'demo'){
+    $('waterDistVal').textContent = '-- cm';
+    $('wifiVal').textContent = 'N/A (demo)';
+    if($('autoSim').checked) demoTimer = setInterval(demoStep, 3000);
+  } else if(lastLiveData){
+    copyLiveToState(lastLiveData);
+  } else {
+    Object.assign(state, DEFAULT_STATE);   // no ESP32 data yet — drop the demo values
+  }
+ 
+  Object.keys(history).forEach(k => { history[k] = []; });
+  seedHistory();
+  updateConnUI();
+  if(m === 'demo') syncSliders();
+  render();
+}
+ 
+document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+document.querySelectorAll('#presetRow [data-preset]').forEach(b => b.addEventListener('click', () => applyPreset(b.dataset.preset)));
+$('ldrDay').addEventListener('click', () => setDaytime(true));
+$('ldrNight').addEventListener('click', () => setDaytime(false));
+$('autoSim').addEventListener('change', () => {
+  if(demoTimer){ clearInterval(demoTimer); demoTimer = null; }
+  if(mode === 'demo' && $('autoSim').checked) demoTimer = setInterval(demoStep, 3000);
+});
+ 
+/* ---- init ---- */
+seedHistory();
+renderXLabels();
+alertsLog = [
+  { time:'10:30 AM', kind:'ok', title:'System Check', desc:'All sensors are operating normally.' },
+  { time:'09:15 AM', kind:'warn', title:'Water Level Low', desc:'Water level is getting low. Please check.' },
+  { time:'08:45 AM', kind:'ok', title:'Weather Update', desc:'No rain detected in the last 2 hours.' }
+];
+renderAlerts();
+buildSliders();
+applySettings();
+setMode(mode);
+startFirebaseLive();
+</script>
+</body>
+</html>
+ 
+Claude finished the response
